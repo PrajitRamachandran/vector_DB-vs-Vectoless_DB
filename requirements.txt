@@ -1,0 +1,39 @@
+# Document loading
+pymupdf
+
+# LangChain
+langchain
+langchain-text-splitters
+langchain-community
+langchain-huggingface
+langchain-groq  
+
+# Vector RAG
+sentence-transformers
+chromadb
+
+# Vectorless RAG
+rank-bm25
+
+# Local LLM (HuggingFace)
+transformers
+accelerate
+torch
+einops
+
+# Cloud LLM
+groq  
+
+# Evaluation
+ragas
+datasets
+
+# Utilities
+python-dotenv
+pandas
+numpy
+matplotlib
+seaborn
+tqdm
+jupyter
+ipykernel

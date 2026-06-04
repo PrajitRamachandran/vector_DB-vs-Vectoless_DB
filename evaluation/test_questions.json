@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "total_questions": 20,
+    "companies": ["NVIDIA", "MICROSOFT", "NETFLIX", "AMAZON"],
+    "categories": ["financial_metrics", "risk_factors", "business_segments", "strategy"]
+  },
+  "questions": [
+    {
+      "id": "Q001", "company": "NVIDIA",
+      "question": "What was NVIDIA's total revenue for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q002", "company": "NVIDIA",
+      "question": "What percentage of NVIDIA's revenue came from data center products?",
+      "category": "business_segments", "difficulty": "medium"
+    },
+    {
+      "id": "Q003", "company": "NVIDIA",
+      "question": "What are the main risk factors NVIDIA identified in its 10-K report?",
+      "category": "risk_factors", "difficulty": "medium"
+    },
+    {
+      "id": "Q004", "company": "NVIDIA",
+      "question": "What was NVIDIA's net income for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q005", "company": "NVIDIA",
+      "question": "What is NVIDIA's strategy for expanding into new markets?",
+      "category": "strategy", "difficulty": "hard"
+    },
+    {
+      "id": "Q006", "company": "MICROSOFT",
+      "question": "What was Microsoft's total revenue for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q007", "company": "MICROSOFT",
+      "question": "How much revenue did Microsoft's cloud segment generate?",
+      "category": "business_segments", "difficulty": "medium"
+    },
+    {
+      "id": "Q008", "company": "MICROSOFT",
+      "question": "What are the key risk factors Microsoft disclosed in its 10-K?",
+      "category": "risk_factors", "difficulty": "medium"
+    },
+    {
+      "id": "Q009", "company": "MICROSOFT",
+      "question": "What was Microsoft's operating income for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q010", "company": "MICROSOFT",
+      "question": "What is Microsoft's stated strategy for artificial intelligence investments?",
+      "category": "strategy", "difficulty": "hard"
+    },
+    {
+      "id": "Q011", "company": "NETFLIX",
+      "question": "What was Netflix's total revenue for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q012", "company": "NETFLIX",
+      "question": "How much did Netflix spend on content assets?",
+      "category": "financial_metrics", "difficulty": "medium"
+    },
+    {
+      "id": "Q013", "company": "NETFLIX",
+      "question": "What risks related to content licensing did Netflix identify?",
+      "category": "risk_factors", "difficulty": "medium"
+    },
+    {
+      "id": "Q014", "company": "NETFLIX",
+      "question": "How many paid memberships did Netflix report?",
+      "category": "business_segments", "difficulty": "easy"
+    },
+    {
+      "id": "Q015", "company": "NETFLIX",
+      "question": "What is Netflix's strategy for growing its advertising revenue?",
+      "category": "strategy", "difficulty": "hard"
+    },
+    {
+      "id": "Q016", "company": "AMAZON",
+      "question": "What was Amazon's total net sales for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q017", "company": "AMAZON",
+      "question": "What was Amazon Web Services revenue for the most recent fiscal year?",
+      "category": "business_segments", "difficulty": "medium"
+    },
+    {
+      "id": "Q018", "company": "AMAZON",
+      "question": "What are the primary competition risks Amazon disclosed in its 10-K?",
+      "category": "risk_factors", "difficulty": "medium"
+    },
+    {
+      "id": "Q019", "company": "AMAZON",
+      "question": "What was Amazon's net income for the most recent fiscal year?",
+      "category": "financial_metrics", "difficulty": "easy"
+    },
+    {
+      "id": "Q020", "company": "AMAZON",
+      "question": "What is Amazon's strategy for its healthcare and pharmacy business?",
+      "category": "strategy", "difficulty": "hard"
+    }
+  ]
+}
