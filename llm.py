@@ -1,18 +1,15 @@
-#llm.py
 from __future__ import annotations
 
 from openai import OpenAI
 
 import config
 
-# Singleton client reused across both pipelines.
 _client: OpenAI | None = None
 
 
 def _extract_text_content(content) -> str:
     """
     Normalises OpenAI-style message content into a plain string.
-    Handles string content and multi-part content arrays.
     """
     if isinstance(content, str):
         return content.strip()
@@ -31,9 +28,7 @@ def _extract_text_content(content) -> str:
 
 def load_llm(verbose: bool = True) -> OpenAI:
     """
-    Creates a Mistral client.
-    Lightweight: no model download, no RAM usage.
-    All inference happens on Mistral's servers.
+    Creates the Mistral client.
     """
     global _client
 
@@ -76,11 +71,11 @@ def generate_answer(client, context: str, question: str) -> str:
     context = (context or "").strip()
     question = (question or "").strip()
 
-    if not context:
-        raise ValueError("Context is empty. Provide retrieved chunks before generating an answer.")
-
     if not question:
         raise ValueError("Question is empty.")
+
+    if not context:
+        return "This information was not found in the retrieved sections."
 
     system_prompt = """You are a precise financial analyst assistant.
 Your job is to answer questions about company 10-K financial reports accurately.
@@ -122,13 +117,12 @@ Answer based strictly on the context above:"""
     if answer:
         return answer
 
-    raise ValueError("Mistral returned an empty response.")
+    return "This information was not found in the retrieved sections."
 
 
 def format_context(retrieved_chunks: list[dict]) -> str:
     """
     Formats retrieved chunks into a single labelled context string.
-    Skips malformed chunks instead of crashing.
     """
     if not retrieved_chunks:
         return ""

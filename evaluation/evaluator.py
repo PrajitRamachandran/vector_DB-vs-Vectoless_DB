@@ -215,15 +215,22 @@ def compute_retrieval_metrics(question_company: str, retrieved_chunks: list[dict
     }
 
 
-def run_evaluation(vector_pipeline, vectorless_pipeline) -> pd.DataFrame:
+def run_evaluation(
+    vector_pipeline,
+    vectorless_pipeline,
+    hybrid_pipeline=None,          # ← optional; pass None to skip
+    results_filename: str = "full_results.csv",
+) -> pd.DataFrame:
     """
-    Runs both pipelines on every question with rate limiting.
+    Runs all active pipelines on every question with rate limiting.
 
-    Per question flow:
-    1. [Mistral generation limiter] -> vector_pipeline.ask()
-    2. [Mistral generation limiter] -> vectorless_pipeline.ask()
-    3. [Mistral judge limiter] -> score_answer() for vector result
-    4. [Mistral judge limiter] -> score_answer() for vectorless result
+    Per question flow (3-method run):
+    1. [generation limiter] → vector_pipeline.ask()
+    2. [generation limiter] → vectorless_pipeline.ask()
+    3. [generation limiter] → hybrid_pipeline.ask()
+    4. [judge limiter]      → score_answer() × 3
+
+    Pass hybrid_pipeline=None to run only vector + vectorless (original behaviour).
     """
     if not QUESTIONS_PATH.exists():
         raise FileNotFoundError(f"Questions file not found: {QUESTIONS_PATH}")
@@ -234,99 +241,97 @@ def run_evaluation(vector_pipeline, vectorless_pipeline) -> pd.DataFrame:
 
     judge_model = load_judge()
 
-    generation_limiter = RateLimiter(max_rpm=config.MISTRAL_RPM, name="Mistral generation")
-    judge_limiter = RateLimiter(max_rpm=config.MISTRAL_JUDGE_RPM, name="Mistral judge")
+    generation_limiter = RateLimiter(max_rpm=config.MISTRAL_RPM,       name="Mistral generation")
+    judge_limiter      = RateLimiter(max_rpm=config.MISTRAL_JUDGE_RPM, name="Mistral judge")
 
-    records = []
-    total = len(questions)
+    # Build the active pipeline list dynamically
+    active_pipelines = [
+        ("vector",     vector_pipeline),
+        ("vectorless", vectorless_pipeline),
+    ]
+    if hybrid_pipeline is not None:
+        active_pipelines.append(("hybrid", hybrid_pipeline))
+
+    n_methods = len(active_pipelines)
+    records   = []
+    total     = len(questions)
 
     print(f"\n{'=' * 55}")
-    print(f"   PHASE 5 - EVALUATION ({total} questions x 2 methods)")
+    print(f"   PHASE 5 - EVALUATION ({total} questions × {n_methods} methods)")
+    print(f"   Methods         : {', '.join(m for m, _ in active_pipelines)}")
     print(f"   Generation limit: {config.MISTRAL_RPM} RPM")
     print(f"   Judge limit     : {config.MISTRAL_JUDGE_RPM} RPM")
-    print(
-        "   Est. time       : ~"
-        f"{int(total * max(60 / config.MISTRAL_RPM * 2, 60 / config.MISTRAL_JUDGE_RPM * 2))} seconds"
-    )
     print(f"{'=' * 55}\n")
 
     from llm import format_context
 
     for i, q in enumerate(tqdm(questions, desc="Questions"), 1):
-        qid = q.get("id", i)
+        qid      = q.get("id", i)
         question = q.get("question", "")
-        company = q.get("company", "")
+        company  = q.get("company", "")
         category = q.get("category", "")
 
         print(f"\n[{i}/{total}] {qid} - {company}")
 
-        generation_limiter.wait()
-        try:
-            vec_result = vector_pipeline.ask(question)
-        except Exception as e:
-            print(f"   Vector pipeline error: {e}")
-            vec_result = {
-                "answer": f"ERROR: {e}",
-                "retrieved": [],
-                "retrieval_time": 0,
-                "generation_time": 0,
-                "total_time": 0,
-            }
+        # ── Generation pass ───────────────────────────────────────────────────
+        pipeline_results = {}
+        for method_name, pipeline in active_pipelines:
+            generation_limiter.wait()
+            try:
+                pipeline_results[method_name] = pipeline.ask(question)
+            except Exception as e:
+                print(f"   {method_name} pipeline error: {e}")
+                pipeline_results[method_name] = {
+                    "answer"         : f"ERROR: {e}",
+                    "retrieved"      : [],
+                    "retrieval_time" : 0,
+                    "generation_time": 0,
+                    "total_time"     : 0,
+                }
 
-        generation_limiter.wait()
-        try:
-            vl_result = vectorless_pipeline.ask(question)
-        except Exception as e:
-            print(f"   Vectorless pipeline error: {e}")
-            vl_result = {
-                "answer": f"ERROR: {e}",
-                "retrieved": [],
-                "retrieval_time": 0,
-                "generation_time": 0,
-                "total_time": 0,
-            }
+        # ── Judge pass ────────────────────────────────────────────────────────
+        judge_scores = {}
+        for method_name, result in pipeline_results.items():
+            context = format_context(result.get("retrieved", []))
+            judge_limiter.wait()
+            judge_scores[method_name] = score_answer(
+                judge_model, question, result.get("answer", ""), context
+            )
+            print(
+                f"   {method_name:<12} score: "
+                f"{judge_scores[method_name]['score']}/5 - "
+                f"{judge_scores[method_name]['reason'][:60]}"
+            )
 
-        vec_context = format_context(vec_result.get("retrieved", []))
-        judge_limiter.wait()
-        vec_judge = score_answer(judge_model, question, vec_result.get("answer", ""), vec_context)
-
-        vl_context = format_context(vl_result.get("retrieved", []))
-        judge_limiter.wait()
-        vl_judge = score_answer(judge_model, question, vl_result.get("answer", ""), vl_context)
-
-        print(f"   Vector     score: {vec_judge['score']}/5 - {vec_judge['reason'][:60]}")
-        print(f"   Vectorless score: {vl_judge['score']}/5 - {vl_judge['reason'][:60]}")
-
-        for method, result, judge in [
-            ("vector", vec_result, vec_judge),
-            ("vectorless", vl_result, vl_judge),
-        ]:
+        # ── Record rows ───────────────────────────────────────────────────────
+        for method_name, result in pipeline_results.items():
+            judge       = judge_scores[method_name]
             ret_metrics = compute_retrieval_metrics(company, result.get("retrieved", []))
             records.append(
                 {
-                    "id": qid,
-                    "company": company,
-                    "category": category,
-                    "method": method,
-                    "question": question,
-                    "answer": result.get("answer", ""),
-                    "judge_score": judge["score"],
-                    "judge_reason": judge["reason"],
-                    "pass": judge["score"] >= 3,
+                    "id"              : qid,
+                    "company"         : company,
+                    "category"        : category,
+                    "method"          : method_name,
+                    "question"        : question,
+                    "answer"          : result.get("answer", ""),
+                    "judge_score"     : judge["score"],
+                    "judge_reason"    : judge["reason"],
+                    "pass"            : judge["score"] >= 3,
                     "company_accuracy": ret_metrics["company_accuracy"],
-                    "avg_chunk_score": ret_metrics["avg_score"],
-                    "correct_chunks": ret_metrics["correct_chunks"],
-                    "retrieval_time": result.get("retrieval_time", 0),
-                    "generation_time": result.get("generation_time", 0),
-                    "total_time": result.get("total_time", 0),
+                    "avg_chunk_score" : ret_metrics["avg_score"],
+                    "correct_chunks"  : ret_metrics["correct_chunks"],
+                    "retrieval_time"  : result.get("retrieval_time", 0),
+                    "generation_time" : result.get("generation_time", 0),
+                    "total_time"      : result.get("total_time", 0),
                 }
             )
 
     df = pd.DataFrame(records)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = RESULTS_DIR / "full_results.csv"
+    out_path = RESULTS_DIR / results_filename
     df.to_csv(out_path, index=False, encoding="utf-8")
-    print(f"\nResults saved -> {out_path}")
+    print(f"\nResults saved → {out_path}")
     return df
 
 
@@ -339,7 +344,17 @@ def print_summary(df: pd.DataFrame):
     print("   EVALUATION SUMMARY")
     print(f"{'=' * 55}")
 
-    for method, label in [("vector", "Vector RAG"), ("vectorless", "Vectorless RAG")]:
+    # Discover methods present in data (preserves insertion order in Python 3.7+)
+    methods_in_data = list(dict.fromkeys(df["method"].tolist()))
+
+    method_labels = {
+        "vector"    : "Vector RAG",
+        "vectorless": "Vectorless RAG",
+        "hybrid"    : "Hybrid RAG",
+    }
+
+    for method in methods_in_data:
+        label = method_labels.get(method, method.title())
         m = df[df["method"] == method]
         if m.empty:
             print(f"\n{label}: no rows")

@@ -10,55 +10,48 @@ def detect_company(question: str) -> str | None:
     """
     Scans the question for a known company name.
     Returns the standardised company name (e.g. "NVIDIA") or None.
-
-    Matching is done with word-boundary style regex checks so short keywords
-    do not accidentally match inside other words.
     """
-    q_lower = question.lower()
+    q_lower = (question or "").lower()
 
-    # Check longer keywords first so "bank of america" wins over "america", etc.
+    # Check longer keywords first so longer names win.
     for keyword, company in sorted(
         config.KNOWN_COMPANIES.items(),
         key=lambda item: len(item[0]),
         reverse=True,
     ):
-        pattern = rf"(?<!\\w){re.escape(keyword.lower())}(?!\\w)"
+        pattern = rf"(?<!\w){re.escape(keyword.lower())}(?!\w)"
         if re.search(pattern, q_lower):
             return company
+
     return None
 
 
 def detect_year(question: str) -> str | None:
     """
     Extracts a 4-digit year from the question if present.
-    Useful for filtering to the right fiscal year.
     """
-    match = re.search(r"\b(20\d{2})\b", question)
+    match = re.search(r"\b(20\d{2})\b", question or "")
     return match.group(1) if match else None
 
 
 def preprocess_query(question: str) -> dict:
     """
-    Analyses the question and returns structured metadata about it.
-    Both retrievers use this to narrow their search before scoring.
-
-    Example:
-        "What was NVIDIA's revenue in 2024?"
-        -> {"company": "NVIDIA", "year": "2024", "clean_query": "..."}
+    Returns structured metadata about the question.
     """
+    question = question or ""
     company = detect_company(question)
     year = detect_year(question)
 
     clean_query = question
 
     if company:
-        company_pattern = rf"(?<!\\w){re.escape(company)}(?!\\w)"
+        company_pattern = rf"(?<!\w){re.escape(company)}(?!\w)"
         clean_query = re.sub(company_pattern, "", clean_query, flags=re.IGNORECASE)
 
     if year:
-        clean_query = re.sub(rf"(?<!\\d){re.escape(year)}(?!\\d)", "", clean_query)
+        year_pattern = rf"(?<!\d){re.escape(year)}(?!\d)"
+        clean_query = re.sub(year_pattern, "", clean_query)
 
-    # Remove leftover punctuation from deletion and collapse extra spaces.
     clean_query = re.sub(r"\s+", " ", clean_query).strip(" ,;:-_()[]{}")
 
     return {
