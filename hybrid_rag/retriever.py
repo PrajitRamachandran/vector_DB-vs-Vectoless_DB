@@ -2,6 +2,24 @@
 #
 # Reciprocal Rank Fusion (RRF) over Vector + BM25 results.
 #
+# Bug fixes applied:
+#
+# 1. MISSING BGE QUERY PREFIX IN _vector_fetch()
+#    BGE (BAAI/bge-base-en-v1.5) requires queries to be prefixed with a
+#    retrieval instruction string. Without it, query embeddings are
+#    sub-optimal and the vector side of the hybrid consistently underperforms.
+#    The same fix is applied in vector_rag/retriever.py.
+#
+# 2. NO COMPANY SANITY-CHECK AFTER VECTOR FETCH
+#    ChromaDB always returns n_results chunks even when the WHERE filter
+#    produces fewer matches than requested — it silently pads with the
+#    nearest neighbours from other companies. Without a post-fetch company
+#    filter, wrong-company chunks enter the RRF fusion pool and pollute
+#    the final answer.
+#    Fix: after fetching from ChromaDB, strip any chunk whose metadata
+#    company doesn't match the target. If that leaves < 3 chunks, retry
+#    without the WHERE filter and filter manually from metadata.
+#
 # Why RRF works:
 #   Vector search finds semantically similar chunks but misses exact terms.
 #   BM25 nails exact financial keywords ($215B, "Data Center") but misses
@@ -11,8 +29,8 @@
 #
 # Flow:
 #   query
-#   ├── vector retriever  → ranked list A  (FETCH_K children)
-#   ├── BM25 retriever    → ranked list B  (FETCH_K children)
+#   ├── vector retriever  → ranked list A  (FETCH_K children, correct company)
+#   ├── BM25 retriever    → ranked list B  (FETCH_K children, correct company)
 #   └── RRF fusion        → merged list → rerank → TOP_K → parent swap → LLM
 
 import sys
@@ -28,10 +46,19 @@ from vectorless_rag.indexer import tokenize
 from utils.query_processor  import preprocess_query
 from reranker               import rerank
 
+# ── BGE query prefix (fix #1) ─────────────────────────────────────────────────
+# Applied to queries only — documents are indexed WITHOUT this prefix.
+BGE_QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
+
+
+def _bge_query(text: str) -> str:
+    return BGE_QUERY_PREFIX + text.strip()
+
+
 # ── RRF constant ──────────────────────────────────────────────────────────────
 # k=60 is the standard value from the original RRF paper (Cormack 2009).
-# Higher k → dampens the advantage of top ranks (more equal weighting).
-# Lower  k → amplifies top-rank advantage (winner-takes-most).
+# Higher k → more equal weighting across ranks.
+# Lower  k → amplifies the advantage of top-ranked documents.
 RRF_K = 60
 
 
@@ -54,93 +81,128 @@ def _fuse_rrf(
     3. Sort by total RRF score descending.
     4. Return top fetch_k unique chunks.
 
-    Deduplication key: chunk text (same child won't be added twice).
+    Deduplication key: parent_id (children of the same parent share context —
+    we want to accumulate their votes rather than double-count the parent).
     """
-    # chunk_id → {"chunk": dict, "rrf_score": float}
+    # parent_id → {"chunk": dict, "rrf_score": float, "sources": list}
     fused: dict[str, dict] = {}
 
     # --- Vector contributions (list A) ---
     for rank, chunk in enumerate(vector_children, start=1):
-        cid   = chunk["metadata"].get("parent_id", chunk["text"][:40])
+        pid   = chunk["metadata"].get("parent_id") or chunk["text"][:40]
         score = _rrf_score(rank)
-        if cid not in fused:
-            fused[cid] = {"chunk": chunk, "rrf_score": 0.0, "sources": []}
-        fused[cid]["rrf_score"] += score
-        fused[cid]["sources"].append("vector")
+        if pid not in fused:
+            fused[pid] = {"chunk": chunk, "rrf_score": 0.0, "sources": []}
+        fused[pid]["rrf_score"] += score
+        fused[pid]["sources"].append("vector")
 
     # --- BM25 contributions (list B) ---
     for rank, chunk in enumerate(bm25_children, start=1):
-        cid   = chunk["metadata"].get("parent_id", chunk["text"][:40])
+        pid   = chunk["metadata"].get("parent_id") or chunk["text"][:40]
         score = _rrf_score(rank)
-        if cid not in fused:
-            fused[cid] = {"chunk": chunk, "rrf_score": 0.0, "sources": []}
-        fused[cid]["rrf_score"] += score
-        fused[cid]["sources"].append("bm25")
+        if pid not in fused:
+            fused[pid] = {"chunk": chunk, "rrf_score": 0.0, "sources": []}
+        fused[pid]["rrf_score"] += score
+        fused[pid]["sources"].append("bm25")
 
     # Sort by accumulated RRF score
     ranked = sorted(fused.values(), key=lambda x: x["rrf_score"], reverse=True)
 
-    # Attach rrf_score to each chunk dict and return top fetch_k
+    # Attach rrf_score + sources to each chunk dict and return top fetch_k
     result = []
     for entry in ranked[:fetch_k]:
         chunk = entry["chunk"].copy()
-        chunk["rrf_score"]    = round(entry["rrf_score"], 6)
-        chunk["rrf_sources"]  = entry["sources"]   # ["vector"], ["bm25"], or both
+        chunk["rrf_score"]   = round(entry["rrf_score"], 6)
+        chunk["rrf_sources"] = entry["sources"]  # ["vector"], ["bm25"], or both
         result.append(chunk)
 
     return result
 
 
-# ── Vector first-stage (inline — no ChromaDB import needed) ───────────────────
+# ── Vector first-stage ────────────────────────────────────────────────────────
 
-def _vector_fetch(query: str, collection, company: str | None) -> list[dict]:
+def _vector_fetch(
+    query:   str,
+    collection,
+    company: str | None,
+) -> list[dict]:
     """
-    Runs a vector similarity search and returns FETCH_K child chunks.
-    No reranking here — that happens once after fusion.
+    Runs a vector similarity search and returns up to FETCH_K child chunks
+    that belong to the target company.
+
+    Guards against ChromaDB silently returning wrong-company chunks when
+    the WHERE filter produces fewer matches than n_results (fix #2).
     """
+    bge_q        = _bge_query(query)                    # fix #1
     where_filter = {"company": company} if company else None
 
     kwargs = dict(
-        query_texts=[query],
+        query_texts=[bge_q],
         n_results  = config.FETCH_K,
         include    = ["documents", "metadatas", "distances"],
     )
     if where_filter:
         kwargs["where"] = where_filter
 
-    results = collection.query(**kwargs)
+    results  = collection.query(**kwargs)
+    docs     = results["documents"][0]
+    metas    = results["metadatas"][0]
+    dists    = results["distances"][0]
 
-    children = []
-    for i in range(len(results["documents"][0])):
-        distance   = results["distances"][0][i]
-        similarity = round(1 / (1 + distance), 4)
-        children.append({
-            "text"    : results["documents"][0][i],
-            "metadata": results["metadatas"][0][i],
-            "score"   : similarity,
-        })
+    def _to_chunks(docs, metas, dists, company_filter):
+        """Converts raw ChromaDB output to chunk dicts, filtering by company."""
+        out = []
+        for i in range(len(docs)):
+            meta = metas[i]
+            # Post-fetch company filter: drop any chunk from the wrong company (fix #2)
+            if company_filter and meta.get("company", "") != company_filter:
+                continue
+            similarity = round(1 / (1 + dists[i]), 4)
+            out.append({
+                "text"    : docs[i],
+                "metadata": meta,
+                "score"   : similarity,
+            })
+        return out
+
+    children = _to_chunks(docs, metas, dists, company)
+
+    # Fallback: if the WHERE filter + post-filter left us with too few chunks,
+    # query without WHERE and filter manually from metadata (fix #2 continued)
+    if company and len(children) < 3:
+        kwargs_no_filter = {k: v for k, v in kwargs.items() if k != "where"}
+        results2 = collection.query(**kwargs_no_filter)
+        children = _to_chunks(
+            results2["documents"][0],
+            results2["metadatas"][0],
+            results2["distances"][0],
+            company,
+        )
+
     return children
 
 
 # ── BM25 first-stage ──────────────────────────────────────────────────────────
 
 def _bm25_fetch(
-    query_info: dict,
+    query_info:   dict,
     bm25_model,
     all_children: list[dict],
     company:      str | None,
 ) -> list[dict]:
     """
     Runs BM25 keyword search on the (optionally filtered) child corpus
-    and returns FETCH_K children. Rebuilds BM25 on filtered subset just
-    like vectorless_rag/retriever.py does.
+    and returns FETCH_K children.
+
+    BM25 is rebuilt on the company-filtered subset (same approach as
+    vectorless_rag/retriever.py) so IDF scores reflect only the relevant
+    documents rather than the whole corpus.
     """
     if company:
         search_children = [c for c in all_children if c["company"] == company]
+        if not search_children:
+            search_children = all_children   # fallback: search all
     else:
-        search_children = all_children
-
-    if not search_children:
         search_children = all_children
 
     tokenized_corpus = [tokenize(c["text"]) for c in search_children]
@@ -169,9 +231,9 @@ def _bm25_fetch(
 
 def retrieve(
     query:         str,
-    collection,                  # ChromaDB collection
-    bm25_model,                  # BM25Okapi instance
-    all_children:  list[dict],   # full children list from BM25 pkl
+    collection,                 # ChromaDB collection
+    bm25_model,                 # BM25Okapi instance
+    all_children:  list[dict],  # full children list from BM25 pkl
     parent_lookup: dict,
     top_k:         int = config.TOP_K,
 ) -> dict:
@@ -179,8 +241,8 @@ def retrieve(
     Full Hybrid RAG retrieval:
 
     1. Preprocess query (company detection, cleaning)
-    2. Vector first-stage   → FETCH_K children
-    3. BM25 first-stage     → FETCH_K children
+    2. Vector first-stage   → up to FETCH_K correct-company children
+    3. BM25 first-stage     → FETCH_K correct-company children
     4. RRF fusion           → merged list (up to 2×FETCH_K unique children)
     5. Cross-encoder rerank → TOP_K best children
     6. Parent swap          → return parent chunks to LLM
@@ -189,7 +251,7 @@ def retrieve(
     query_info = preprocess_query(query)
     company    = query_info["company"]
 
-    # ── First-stage: both retrievers run in parallel (sequential here, same thread) ──
+    # ── First-stage: both retrievers ─────────────────────────────────────────
     vector_start    = time.perf_counter()
     vector_children = _vector_fetch(query, collection, company)
     vector_latency  = time.perf_counter() - vector_start
@@ -199,7 +261,7 @@ def retrieve(
     bm25_latency    = time.perf_counter() - bm25_start
 
     # ── RRF fusion ────────────────────────────────────────────────────────────
-    fused_children  = _fuse_rrf(vector_children, bm25_children, config.FETCH_K)
+    fused_children    = _fuse_rrf(vector_children, bm25_children, config.FETCH_K)
     retrieval_latency = time.perf_counter() - start_time
 
     # ── Rerank fused list once ────────────────────────────────────────────────
@@ -223,7 +285,7 @@ def retrieve(
                     "rerank_score": child.get("rerank_score", child["score"]),
                     "rrf_score"   : child.get("rrf_score", 0.0),
                     "rrf_sources" : child.get("rrf_sources", []),
-                    "child_text"  : child["text"],    # keep for debugging
+                    "child_text"  : child["text"],    # kept for debugging
                 })
 
     return {
