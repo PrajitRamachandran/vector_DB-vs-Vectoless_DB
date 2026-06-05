@@ -1,0 +1,191 @@
+id,company,category,method,question,answer,judge_score,judge_reason,pass,company_accuracy,avg_chunk_score,correct_chunks,retrieval_time,generation_time,total_time,difficulty
+Q001,NVIDIA,financial_metrics,vector,What was NVIDIA's total revenue for the most recent fiscal year?,"For **NVIDIA**, the total revenue for the most recent fiscal year (ended **January 25, 2026**) was **$215,938 million** (or **$215.94 billion**). This figure is sourced from the Consolidated Statements of Income (Source 2).",5,"Exact revenue figure ($215,938M) directly cited from Consolidated Statements of Income.",True,1.0,4.1386,5,8.1652,1.8984,10.0636,easy
+Q001,NVIDIA,financial_metrics,vectorless,What was NVIDIA's total revenue for the most recent fiscal year?,"For **NVIDIA**, the total revenue for the most recent fiscal year (ended **January 25, 2026**) was **$215.9 billion**, reflecting a **65% increase** from the prior year.",5,Exact revenue figure ($215.9B) and fiscal year match the 10-K context.,True,1.0,-1.9549,4,0.2068,1.0474,1.2542,easy
+Q001,NVIDIA,financial_metrics,hybrid,What was NVIDIA's total revenue for the most recent fiscal year?,"For **NVIDIA**, the total revenue for the most recent fiscal year (ended **January 25, 2026**) was **$215,938 million** (or **$215.94 billion**). This figure is found in the Consolidated Statements of Income (Source 2).",5,"Exact revenue figure ($215,938M) correctly cited from Source 2.",True,1.0,4.1386,5,0.3814,1.4666,1.848,easy
+Q002,NVIDIA,business_segments,vector,What percentage of NVIDIA's revenue came from data center products?,"For **NVIDIA**, the percentage of revenue from **Data Center** products was:
+
+- **90%** in fiscal year 2026 ($193,737M of $215,938M total revenue).
+- **88%** in fiscal year 2025 ($115,186M of $130,497M total revenue).
+- **78%** in fiscal year 2024 ($47,525M of $60,922M total revenue).
+
+*(Calculated as Data Center revenue ÷ Total revenue for each year.)*",5,Exact figures correctly sourced and calculated from 10-K data.,True,1.0,1.9684,5,0.2761,3.1731,3.4492,medium
+Q002,NVIDIA,business_segments,vectorless,What percentage of NVIDIA's revenue came from data center products?,"The **exact percentage of NVIDIA's revenue from data center products** was not explicitly stated in the retrieved sections.
+
+However, the **Compute & Networking segment** (which includes Data Center revenue) accounted for **$130.14 billion** of NVIDIA's **$215.94 billion** total revenue in fiscal 2026 (~**60%**). The context notes that **Data Center revenue grew 68% YoY**, but the standalone percentage is not provided.",3,"Incomplete; lacks explicit Data Center revenue percentage, infers loosely.",True,1.0,0.6697,5,0.1805,1.8323,2.0128,medium
+Q002,NVIDIA,business_segments,hybrid,What percentage of NVIDIA's revenue came from data center products?,"For **NVIDIA**, the percentage of revenue from **Data Center** products can be calculated from the provided figures in **Source 1 (Page 79)**:
+
+- **2026**: **$193,737M / $215,938M = ~90%**
+- **2025**: **$115,186M / $130,497M = ~88%**
+- **2024**: **$47,525M / $60,922M = ~78%**
+
+The Data Center segment dominates NVIDIA's revenue, growing significantly year-over-year.",5,Precise calculation with exact figures from the 10-K.,True,1.0,0.6337,5,0.2805,2.3253,2.6058,medium
+Q003,NVIDIA,risk_factors,vector,What are the main risk factors NVIDIA identified in its 10-K report?,This information was not found in the retrieved sections. The provided context from **NVIDIA's** 10-K report mentions **Item 1A. Risk Factors** (Source 1 and 2) but does not include the actual list of risk factors. Only a general statement about their potential impact is provided.,3,Acknowledges risk factors exist but lacks specific details from 10-K.,True,1.0,0.6653,4,0.3394,1.4464,1.7858,medium
+Q003,NVIDIA,risk_factors,vectorless,What are the main risk factors NVIDIA identified in its 10-K report?,"This information was not found in the retrieved sections. The provided context from **NVIDIA's** 10-K report mentions the *existence* of **Risk Factors (Item 1A)** and references cybersecurity-related risks, but it does not list the **specific main risk factors** identified by the company. For details, you would need to review the full **""Item 1A. Risk Factors""** section of the report.",3,Acknowledges risk factors exist but lacks specific details from Item 1A.,True,1.0,-0.1234,4,0.2116,1.4738,1.6854,medium
+Q003,NVIDIA,risk_factors,hybrid,What are the main risk factors NVIDIA identified in its 10-K report?,"The provided context for **NVIDIA** does not explicitly list the **specific risk factors** identified in its 10-K report. It only mentions that risk factors are discussed under **Item 1A** (Page 12 and 32) and that they could harm the company’s business, financial condition, or reputation.
+
+For details, refer to **""Item 1A. Risk Factors""** in NVIDIA’s full 10-K report. The exact risks are not included in the retrieved sections.",3,Correctly identifies location but lacks specific risk factors from context.,True,1.0,0.8768,5,0.2905,1.9397,2.2302,medium
+Q004,NVIDIA,financial_metrics,vector,What was NVIDIA's net income for the most recent fiscal year?,"For **NVIDIA**, the net income for the most recent fiscal year (ended **January 25, 2026**) was **$120,067 million** (or **$120.07 billion**).
+
+*(Source: Consolidated Statements of Comprehensive Income, Page 52)*",4,Correct figure but mislabeled units (million vs. billion).,True,1.0,4.8087,5,0.3749,1.4748,1.8497,easy
+Q004,NVIDIA,financial_metrics,vectorless,What was NVIDIA's net income for the most recent fiscal year?,"For **NVIDIA**, the net income for the most recent fiscal year (ended **January 25, 2026**) was **$120.067 billion**. This represents a **65% increase** from the prior year.",5,"Exact net income figure ($120.067B) directly cited from 10-K, Page 37.",True,1.0,-5.2409,5,0.2216,1.6197,1.8413,easy
+Q004,NVIDIA,financial_metrics,hybrid,What was NVIDIA's net income for the most recent fiscal year?,"NVIDIA's net income for the most recent fiscal year (ended **January 25, 2026**) was **$120,067 million** (or $120.07 billion). This figure is sourced from the **Consolidated Statements of Comprehensive Income** (Source 2).",5,"Exact net income figure ($120,067M) directly cited from Source 2.",True,1.0,4.8087,5,0.3113,1.3317,1.643,easy
+Q005,NVIDIA,strategy,vector,What is NVIDIA's strategy for expanding into new markets?,"NVIDIA's strategy for expanding into new markets involves:
+
+1. **Accelerated Computing Platform**: Leveraging its GPU architecture to create platforms for computationally intensive fields like AI, data science, autonomous vehicles, and robotics (Source 2).
+2. **Full-Stack Innovation**: Delivering performance leaps by innovating across architecture, chip design, software, and algorithms to outpace Moore’s Law (Source 1).
+3. **Platform Strategy**: Integrating hardware, software, AI models, and services to address industries like healthcare, telecom, automotive, and manufacturing (Source 5).",3,Correct themes but misattributed sources and lacks automotive/DRIVE OS specifics.,True,1.0,2.9772,5,0.244,4.3417,4.5857,hard
+Q005,NVIDIA,strategy,vectorless,What is NVIDIA's strategy for expanding into new markets?,"For **NVIDIA**, the strategy for expanding into new markets includes:
+
+1. **Leveraging intellectual property (IP)** through licensing and development agreements, enabling partners and customers to integrate NVIDIA’s technology into their own products (Source 2).
+2. **Global sales and marketing efforts**, including a robust partner network (CSPs, OEMs, ODMs, ISVs, etc.) to drive adoption of its computing platforms and software across industries (Source 2).
+3. **Expanding supply chain resiliency** by diversifying manufacturing beyond Asia into the U.S. and Latin America to meet growing AI infrastructure demand (Source 5).
+
+No explicit details on market-specific tactics (e.g., product localization) were found in the provided context.",3,Lacks direct market-expansion strategy; IP and sales are tangential.,True,1.0,-6.086,5,0.1743,2.5791,2.7534,hard
+Q005,NVIDIA,strategy,hybrid,What is NVIDIA's strategy for expanding into new markets?,"NVIDIA's strategy for expanding into new markets involves:
+
+1. **Accelerated Computing Platform**: Leveraging its GPU architecture to create platforms for computationally intensive fields like AI, data science, autonomous vehicles, and robotics (Source 1, Source 2).
+2. **Full-Stack Innovation**: Delivering performance advantages through innovation across architecture, chip design, software, and algorithms to outpace traditional approaches (Source 1).
+3. **Platform Strategy**: Integrating hardware, software, AI models, and services to enable solutions like generative AI, autonomous systems, and digital twins (Source 3, Source 5).",4,Correct but omits autonomous vehicle/DRIVE OS market expansion details from Source 1.,True,1.0,2.8856,5,0.2505,6.9598,7.2103,hard
+Q006,MICROSOFT,financial_metrics,vector,What was Microsoft's total revenue for the most recent fiscal year?,"Microsoft's total revenue for the most recent fiscal year (2025) was **$281,724 million**. This figure is sourced from Microsoft's financial report (Page 39 and Page 85).",5,"Exact revenue figure ($281,724M) directly cited from Page 39 context.",True,1.0,2.9153,5,0.2859,1.1393,1.4252,easy
+Q006,MICROSOFT,financial_metrics,vectorless,What was Microsoft's total revenue for the most recent fiscal year?,"For **Microsoft**, the total revenue for the most recent fiscal year (2025) was **$281,724 million** (or $281.7 billion), reflecting a **15% increase** from the prior year. This figure is sourced from Pages 38 and 39 of the provided context.",5,Exact revenue figure ($281.7B) directly cited from Page 39.,True,1.0,1.1458,5,0.187,1.331,1.518,easy
+Q006,MICROSOFT,financial_metrics,hybrid,What was Microsoft's total revenue for the most recent fiscal year?,"Microsoft's total revenue for the most recent fiscal year (2025) was **$281,724 million** (or $281.7 billion). This figure is sourced from **Page 39** and **Page 85** of Microsoft's financial report.",5,Exact revenue figure ($281.7B) directly cited from Page 39 context.,True,1.0,2.824,5,0.3041,1.1237,1.4278,easy
+Q007,MICROSOFT,business_segments,vector,How much revenue did Microsoft's cloud segment generate?,"For **Microsoft**, the cloud segment (Microsoft Cloud), which includes Microsoft 365 Commercial cloud, Azure, LinkedIn, and Dynamics 365, generated:
+
+- **$168.9 billion** in fiscal year 2025
+- **$137.7 billion** in fiscal year 2024
+- **$111.6 billion** in fiscal year 2023.",5,"Exact figures from Source 2, fully supported by 10-K context.",True,1.0,7.019,5,0.2389,1.4077,1.6466,medium
+Q007,MICROSOFT,business_segments,vectorless,How much revenue did Microsoft's cloud segment generate?,"For **Microsoft**, the cloud segment (Microsoft Cloud) generated **$168.9 billion** in revenue for fiscal year 2025, reflecting a **23% increase** compared to fiscal year 2024. This figure includes revenue from Microsoft 365 Commercial cloud, Azure and other cloud services, LinkedIn (commercial portion), and Dynamics 365.",5,Exact figure ($168.9B) and sources match context precisely.,True,1.0,1.3189,4,0.187,1.4481,1.6351,medium
+Q007,MICROSOFT,business_segments,hybrid,How much revenue did Microsoft's cloud segment generate?,"For **Microsoft**, the cloud segment (Microsoft Cloud), which includes Microsoft 365 Commercial cloud, Azure, LinkedIn (commercial portion), and Dynamics 365, generated:
+
+- **$168.9 billion** in fiscal year 2025 (a 23% increase from 2024).
+- **$137.7 billion** in fiscal year 2024.",5,"Exact cloud revenue figures from 10-K, fully supported by Source 2.",True,1.0,7.019,5,0.2691,1.9384,2.2075,medium
+Q008,MICROSOFT,risk_factors,vector,What are the key risk factors Microsoft disclosed in its 10-K?,"This information was not found in the retrieved sections. The provided context mentions that **Microsoft** discusses risk factors in **Part I, Item 1A** of its 10-K but does not include the actual details of those risks. For specifics, refer to that section directly.",3,Correctly cites location but lacks disclosed risk details.,True,1.0,0.3699,5,0.2795,1.4323,1.7118,medium
+Q008,MICROSOFT,risk_factors,vectorless,What are the key risk factors Microsoft disclosed in its 10-K?,"For **Microsoft**, the key risk factors disclosed in its 10-K (Fiscal Year 2025) include:
+
+1. **Competitive risks**: Intense competition in the technology sector, including from global firms and specialized startups, which could hurt operations.
+2. **Regulatory risks**: Compliance challenges with acts like the **Digital Markets Act** and **EU Digital Services Act**, as well as broader global trade policy changes (e.g., tariffs).
+3. **Intellectual property risks**: Unauthorized access or leaks of **source code**, and third-party claims of IP infringement (including AI-related disputes).
+4. **Economic and supply chain risks**: Global economic volatility and trade restrictions may disrupt operations and increase costs.
+
+*(Sources: Pages 16, 27, 36)*",3,Lacks direct quotes; omits cybersecurity and legal risks from Item 1A.,True,1.0,-1.2322,5,0.1837,3.4402,3.6239,medium
+Q008,MICROSOFT,risk_factors,hybrid,What are the key risk factors Microsoft disclosed in its 10-K?,"For **Microsoft**, the provided context highlights the following key risk factors disclosed in its **2025 10-K**:
+
+1. **Global economic and trade policy risks**: Supply chain challenges, cost volatility, and consumer uncertainty due to trade restrictions (e.g., tariffs).
+2. **Cybersecurity threats**: An increasingly challenging threat environment, though no material impact was reported as of the filing date.
+3. **Regulatory compliance risks**: Oversight under the **EU Digital Markets Act** and **Digital Services Act**, with broader regulatory risks detailed in **Item 1A (Risk Factors)**.
+
+For a full list, refer to **Part I, Item 1A** of Microsoft’s 10-K.",3,Context lacks explicit risk details; answer extrapolates beyond provided sources.,True,1.0,1.0321,5,0.3068,6.0278,6.3346,medium
+Q009,MICROSOFT,financial_metrics,vector,What was Microsoft's operating income for the most recent fiscal year?,"For **Microsoft**, the operating income for the most recent fiscal year (2025) was **$128,528 million** (as shown in **Source 3** and **Source 4**). This reflects a **17% increase** from the prior year.",1,No supporting sources provided; figures unsourced and unverifiable.,False,1.0,1.0446,5,0.2392,1.5397,1.7789,easy
+Q009,MICROSOFT,financial_metrics,vectorless,What was Microsoft's operating income for the most recent fiscal year?,This information was not found in the retrieved sections. The provided context does not include Microsoft's operating income for the most recent fiscal year.,5,Context lacks operating income; answer correctly identifies absence.,True,1.0,-3.9707,5,0.1911,0.9437,1.1348,easy
+Q009,MICROSOFT,financial_metrics,hybrid,What was Microsoft's operating income for the most recent fiscal year?,"For **Microsoft**, the operating income for the most recent fiscal year (2025) was **$128,528 million** (as stated in **Source 3** and **Source 4**). This reflects a **17% increase** from the prior year.",1,No supporting sources provided; figures are unsourced and unverified.,False,1.0,0.9727,5,0.3084,1.3003,1.6087,easy
+Q010,MICROSOFT,strategy,vector,What is Microsoft's stated strategy for artificial intelligence investments?,"Microsoft's stated AI strategy involves:
+
+1. **Infusing generative AI** across consumer and commercial offerings while investing in AI models, services, platforms, and infrastructure to meet customer needs (Source 3).
+2. **Applying AI and ambient intelligence** to drive insights, transform work processes, and boost productivity—particularly through tools like **Microsoft 365 Copilot** (Source 4).
+3. **Expanding AI access** via training programs (e.g., LinkedIn learning pathways) and grants to foster digital skilling (Source 4).",2,Sources 1-2 cited; claims unsupported by provided context.,False,1.0,-0.03,4,0.2293,5.8175,6.0468,hard
+Q010,MICROSOFT,strategy,vectorless,What is Microsoft's stated strategy for artificial intelligence investments?,"Microsoft's AI strategy focuses on **infusing generative AI across its consumer and commercial offerings** while investing heavily in AI models, services, platforms, and infrastructure (Source 3). Key initiatives include:
+
+- **Integrating AI into products** like Microsoft 365 Copilot and ambient intelligence to drive productivity gains (Source 4).
+- **Leveraging its partnership with OpenAI**, including exclusive rights to OpenAI’s IP and Azure-based deployment (Source 5).
+- **Expanding AI training and access** via skilling programs, grants, and LinkedIn learning pathways (Source 4).",3,Lacks direct 10-K citation; mentions unsourced claims (Sources 3-5).,True,1.0,-1.2853,5,0.1952,2.3782,2.5734,hard
+Q010,MICROSOFT,strategy,hybrid,What is Microsoft's stated strategy for artificial intelligence investments?,"Microsoft's AI strategy focuses on **infusing generative AI across its consumer and commercial offerings** while investing heavily in AI models, services, platforms, and infrastructure to meet customer needs (Source 3). The company aims to **apply AI and ambient intelligence** to drive productivity gains (e.g., via Microsoft 365 Copilot) and revolutionize work processes, alongside providing **AI training and digital skilling programs** (Source 4). Competition in AI is a priority, with significant resources allocated to **scaling cloud-based AI services** and sustaining long-term growth (Sources 3, 4).",3,Lacks direct 10-K quotes; mentions unsourced claims (Sources 3/4).,True,1.0,-0.7319,5,0.29,6.9129,7.2029,hard
+Q011,NETFLIX,financial_metrics,vector,What was Netflix's total revenue for the most recent fiscal year?,"For **Netflix**, the total revenue for the most recent fiscal year (2025) was **$45,183,036,000** (or $45.2 billion). This figure is reported in **Source 1** and **Source 4** as the total streaming revenue, with DVD revenue discontinued.",5,Exact revenue figure ($45.2B) directly cited from Source 1’s 2025 data.,True,1.0,-2.2666,5,0.4833,1.4896,1.9729,easy
+Q011,NETFLIX,financial_metrics,vectorless,What was Netflix's total revenue for the most recent fiscal year?,"For **Netflix**, the total streaming revenues for the most recent fiscal year (2025) were **$45,183,036,000** (or **$45.18 billion**). This figure is derived from the sum of all regional revenues listed in **Source 1**.",5,"Exact revenue figure ($45.18B) directly cited from Source 1, Page 51.",True,1.0,-6.252,5,0.2236,1.3168,1.5404,easy
+Q011,NETFLIX,financial_metrics,hybrid,What was Netflix's total revenue for the most recent fiscal year?,"For **Netflix**, the total revenue for the most recent fiscal year (2025) was **$45,183,036,000** (or $45.18 billion). This figure is reported in **Source 1** and **Source 4** as the total streaming revenue, which now represents all revenue following the discontinuation of the DVD business.",5,Exact revenue figure ($45.18B) directly cited from Source 1.,True,1.0,-2.2666,5,0.3412,3.2334,3.5746,easy
+Q012,NETFLIX,financial_metrics,vector,How much did Netflix spend on content assets?,"For **Netflix**, the **amortization of content assets** (a reflection of spending) for the years ended December 31 was:
+
+- **2025:** $16,422,166 (in thousands)
+- **2024:** $15,301,517 (in thousands)
+- **2023:** $14,197,437 (in thousands)
+
+The *gross* content assets (licensed + produced) as of December 31, 2025, totaled **$32,778,392 (in thousands)**. Exact *cash spending* figures are not provided in this context.",3,"Amortization ≠ spending; context shows assets, not cash outlay.",True,1.0,2.0505,3,0.3373,2.4604,2.7977,medium
+Q012,NETFLIX,financial_metrics,vectorless,How much did Netflix spend on content assets?,"For **Netflix**, the total content assets (licensed + produced) for the year ended **December 31, 2025**, were **$16,422,166,000** (in thousands). This includes:
+- **Licensed content**: $8,713,558,000
+- **Produced content**: $7,708,608,000
+
+The net content assets (after amortization/tax incentives) were **$32,778,392,000** as of December 31, 2025.",5,"Exact figures from 10-K, fully supported by retrieved context.",True,1.0,-0.9397,4,0.2628,2.2222,2.485,medium
+Q012,NETFLIX,financial_metrics,hybrid,How much did Netflix spend on content assets?,"For **Netflix**, the amortization expense (which reflects spending on content assets) for the years ended December 31 was:
+
+- **2025:** $16,422,166,000
+- **2024:** $15,301,517,000
+- **2023:** $14,197,437,000
+
+This represents the total amortization of **licensed** and **produced** content assets for each year. The figures are in thousands.",3,"Amortization ≠ spending; context shows asset balances, not cash outlays.",True,1.0,0.6612,5,0.2642,2.0312,2.2954,medium
+Q013,NETFLIX,risk_factors,vector,What risks related to content licensing did Netflix identify?,"Netflix identified the following **content licensing risks** in its 10-K:
+
+1. **Licensing refusal**: Studios or rights holders may refuse to license content on acceptable terms, limiting Netflix’s ability to offer compelling content.
+2. **Content withdrawal**: Some licenses allow providers to pull content quickly, reducing Netflix’s catalog unpredictably.
+3. **Rising costs**: Increased competition drives up programming costs, pressuring profitability.
+4. **Exclusive content challenges**: As competitors launch their own streaming services, they may withhold popular titles from Netflix.
+
+*(Source: Netflix, Pages 11 and 4)*",3,Partially correct; only one risk directly supported by provided context.,True,1.0,-0.7124,5,0.2594,3.615,3.8744,medium
+Q013,NETFLIX,risk_factors,vectorless,What risks related to content licensing did Netflix identify?,"For **Netflix**, the identified risks related to content licensing include:
+
+1. **Licensing refusal**: Studios, content providers, or rights holders may refuse to license streaming content or related rights (e.g., music) on terms acceptable to Netflix, adversely affecting its business.
+2. **Dependency on third parties**: Netflix’s ability to provide content depends on securing distribution rights and other necessary licenses from third parties.
+
+*(Sources: Netflix, Pages 11 and 5)*",5,"Precise, fully supported by cited 10-K excerpts on licensing risks.",True,1.0,-2.3493,4,0.1526,2.1084,2.261,medium
+Q013,NETFLIX,risk_factors,hybrid,What risks related to content licensing did Netflix identify?,"Netflix identified the following **content licensing risks** in its 10-K:
+
+1. **Licensing refusal**: Studios or rights holders may refuse to license content on acceptable terms, limiting Netflix’s ability to stream popular titles.
+2. **Content withdrawal**: Some licenses allow providers to pull content quickly, reducing Netflix’s catalog unpredictably.
+3. **Rising costs**: Increased competition drives up programming costs, pressuring profitability.
+4. **Exclusive rights challenges**: Securing exclusive content is critical but may become harder as competitors (including studios launching their own services) restrict access.
+
+*(Source: Netflix, Pages 11 and 50)*",3,Partially correct; only one risk directly supported by context (licensing refusal).,True,1.0,-0.5927,5,0.253,3.3679,3.6209,medium
+Q014,NETFLIX,business_segments,vector,How many paid memberships did Netflix report?,"This information was not found in the retrieved sections. However, **Netflix** explicitly stated in the provided context (Source 1, Page 23) that it **discontinued reporting membership numbers** (including average paying memberships) as of December 31, 2025, focusing instead on revenue and operating margin.",5,Accurate: Disclosure of discontinued membership reporting matches context.,True,1.0,-2.6071,5,0.2426,1.5758,1.8184,easy
+Q014,NETFLIX,business_segments,vectorless,How many paid memberships did Netflix report?,"This information was not found in the retrieved sections.
+
+However, **Netflix** explicitly stated in the provided context (Source 2, Page 23) that it **discontinued reporting membership numbers** (including average paying memberships) as of December 31, 2025, focusing instead on revenue and operating margin.",5,"Accurate: Netflix no longer reports membership numbers, per 10-K disclosure.",True,1.0,-4.8623,5,0.1623,1.2194,1.3817,easy
+Q014,NETFLIX,business_segments,hybrid,How many paid memberships did Netflix report?,"This information was not found in the retrieved sections. **Netflix** explicitly stated in the provided context (Source 1, Note 1) that it discontinued reporting membership numbers, including paid memberships, as of December 31, 2025.",5,Accurate: Disclosure of discontinued membership reporting matches context.,True,1.0,-2.7113,5,0.2705,1.1265,1.397,easy
+Q015,NETFLIX,strategy,vector,What is Netflix's strategy for growing its advertising revenue?,"For **Netflix**, the context outlines several factors critical to its strategy for growing advertising revenue, though it does not explicitly state a formalized strategy. Key dependencies include:
+
+- **Attracting and retaining advertisers** while competing effectively for ad spend.
+- **Optimizing member engagement** and managing fluctuations in membership plan mix to maximize ad exposure.
+- **Ensuring ad quality and quantity** to appeal to both members and advertisers.
+- **Navigating macroeconomic and seasonal shifts** that impact advertising budgets.
+
+The company acknowledges risks due to its limited experience in advertising. *(Sources 1, 3)*",3,Lacks explicit strategy; context mentions ads but no growth plan details.,True,1.0,-2.4154,4,0.2231,2.4448,2.6679,hard
+Q015,NETFLIX,strategy,vectorless,What is Netflix's strategy for growing its advertising revenue?,"For **Netflix**, the context highlights several key aspects of its advertising revenue growth strategy:
+
+- It aims to **attract and retain advertisers** while managing risks like fluctuations in membership engagement and ad quality (Source 2).
+- Growth is tied to **expanding its ad-supported subscription plan** and competing effectively for advertising spend (Sources 2 & 4).
+- The company acknowledges challenges due to its **limited operating history in advertising** and macroeconomic conditions (Sources 2 & 4). No specific tactical details (e.g., partnerships, tech investments) are provided.",3,Lacks specific strategy details; risks ≠ growth tactics.,True,1.0,-3.189,4,0.1773,2.3835,2.5608,hard
+Q015,NETFLIX,strategy,hybrid,What is Netflix's strategy for growing its advertising revenue?,"For **Netflix**, the context highlights several key aspects of its advertising revenue growth strategy, though no explicit step-by-step plan is provided:
+
+- Success depends on **attracting and retaining advertisers**, improving **member engagement**, and ensuring **ad quality/quantity** (Source 2).
+- Growth is tied to **competing effectively for ad spend** and navigating macroeconomic shifts, seasonal trends, and membership plan mix (Source 2).
+- The company acknowledges risks due to its **limited experience** in advertising, emphasizing experimentation with new offerings like ad-supported plans (Source 5).
+
+*A detailed strategy document was not found in the retrieved sections.*",3,Lacks explicit strategy; cites risks/dependencies but no concrete growth plan.,True,1.0,-2.8197,5,0.297,3.4438,3.7408,hard
+Q016,AMAZON,financial_metrics,vector,What was Amazon's total net sales for the most recent fiscal year?,"For **Amazon**, the total net sales for the most recent fiscal year (2025) were **$717 billion**, reflecting a 12% year-over-year increase from $638 billion in 2024. This figure is explicitly stated in **Source 1 (Page 8)**.",5,Exact figure ($717B) directly cited from Source 1 with YoY growth context.,True,1.0,0.5636,4,0.4261,1.2149,1.641,easy
+Q016,AMAZON,financial_metrics,vectorless,What was Amazon's total net sales for the most recent fiscal year?,"For **Amazon**, the total net sales for the most recent fiscal year (year ended **December 31, 2025**) were **$716,924 million** (or **$716.9 billion**). This figure is sourced from the consolidated statements of operations in **Source 1**.",4,Correct figure but wrong fiscal year (2025 vs. 2023).,True,1.0,-4.5374,5,0.3757,1.6042,1.9799,easy
+Q016,AMAZON,financial_metrics,hybrid,What was Amazon's total net sales for the most recent fiscal year?,"For **Amazon**, the total net sales (revenue) for the most recent fiscal year (2025) were **$717 billion**, reflecting a 12% year-over-year increase from $638 billion in 2024. This figure is explicitly stated in **Source 1**.",5,Exact revenue figure ($717B) directly cited from Source 1.,True,1.0,-0.2448,5,0.4187,1.3278,1.7465,easy
+Q017,AMAZON,business_segments,vector,What was Amazon Web Services revenue for the most recent fiscal year?,"For **Amazon**, the most recent fiscal year revenue for **Amazon Web Services (AWS)** in 2025 was **$129 billion**, reflecting a **20% year-over-year increase** from $108 billion in 2024.",5,Exact AWS revenue ($129B) and YoY growth (20%) directly cited from 10-K.,True,1.0,-0.7258,4,0.3545,1.4013,1.7558,medium
+Q017,AMAZON,business_segments,vectorless,What was Amazon Web Services revenue for the most recent fiscal year?,"For **Amazon**, the AWS (Amazon Web Services) revenue for the most recent fiscal year (2025) was **$129 billion**, reflecting a **20% year-over-year increase** from $108 billion in 2024. This figure is sourced from their 2025 financial performance summary.",5,Exact AWS revenue ($129B) and YoY growth (20%) directly cited from 10-K context.,True,1.0,-1.5845,5,0.3072,5.6389,5.9461,medium
+Q017,AMAZON,business_segments,hybrid,What was Amazon Web Services revenue for the most recent fiscal year?,"For **Amazon**, the AWS (Amazon Web Services) revenue for the most recent fiscal year (2025) was **$129 billion**, reflecting a 20% year-over-year increase from $108 billion in 2024. This figure is sourced from the 2025 financial summary in **Source 1**.",5,Exact AWS revenue ($129B) and YoY growth (20%) cited from Source 1.,True,1.0,-0.8837,5,0.3519,1.5286,1.8805,medium
+Q018,AMAZON,risk_factors,vector,What are the primary competition risks Amazon disclosed in its 10-K?,"For **Amazon.com, Inc.**, the provided context (Page 26) mentions competition-related risks tied to **open investigations** alleging that aspects of its operations—such as its **stores, fulfillment network, Prime membership, and AWS cloud services**—may infringe **competition or consumer protection rules**. The company states it **strongly disputes these claims** and intends to defend itself vigorously. No further details on specific risks or outcomes were found in the retrieved sections.",1,No competition risks disclosed in provided 10-K context (Pages 13/88).,False,1.0,-2.2592,5,0.2953,2.0763,2.3716,medium
+Q018,AMAZON,risk_factors,vectorless,What are the primary competition risks Amazon disclosed in its 10-K?,"For **Amazon**, the primary competition risks disclosed in its 10-K include:
+
+1. **Intense competition** across its businesses, which are ""rapidly evolving"" and face ""many competitors across geographies"" (Source 3).
+2. **Aggressive, capable, and well-funded competitors**, alongside challenges in product/geographic expansion and execution risks (Source 2).
+3. **Regulatory scrutiny** tied to competition-related claims, such as investigations into its stores, fulfillment network, Prime, and AWS cloud services (Source 1).",3,Regulatory risks correct; lacks direct competition details from provided sources.,True,1.0,-8.0035,5,0.1674,2.0844,2.2518,medium
+Q018,AMAZON,risk_factors,hybrid,What are the primary competition risks Amazon disclosed in its 10-K?,"For **Amazon.com, Inc.**, the primary competition-related risks disclosed in its 10-K (Page 26) include:
+
+- **Open investigations** alleging that aspects of its operations—such as its **stores, fulfillment network, Prime membership, and AWS cloud services**—may infringe **competition-related or consumer protection rules**.
+- The company **strongly disputes these claims** but acknowledges regulatory scrutiny as a risk.
+
+No further details on specific investigations or outcomes were provided in the retrieved sections.",3,Lacks direct 10-K citation; context doesn’t confirm Page 26 or specifics.,True,1.0,-2.2592,5,0.2863,3.5575,3.8438,medium
+Q019,AMAZON,financial_metrics,vector,What was Amazon's net income for the most recent fiscal year?,"This information was not found in the retrieved sections of **Amazon's** 10-K report. The provided context includes revenue, operating income, and free cash flow but does not mention net income for 2025 or any other year.",5,Accurately notes net income absence in provided context.,True,1.0,0.4676,4,0.3057,1.8879,2.1936,easy
+Q019,AMAZON,financial_metrics,vectorless,What was Amazon's net income for the most recent fiscal year?,"This information was not found in the retrieved sections of **Amazon.com, Inc.'s** 10-K report. The provided context includes details on cash, debt, other income (expense), and operating expenses but does not disclose net income figures.",5,Context lacks net income; answer correctly identifies absence.,True,1.0,-5.0244,5,0.3433,1.1297,1.473,easy
+Q019,AMAZON,financial_metrics,hybrid,What was Amazon's net income for the most recent fiscal year?,"For **Amazon**, the net income for the most recent fiscal year (ended **December 31, 2025**) was **$77,670 million** (or **$77.67 billion**).
+
+*(Source: Consolidated Statements of Comprehensive Income, Page 49)*",1,No net income data in provided context; answer unsupported.,False,1.0,-0.132,5,0.3839,1.4975,1.8814,easy
+Q020,AMAZON,strategy,vector,What is Amazon's strategy for its healthcare and pharmacy business?,"For **Amazon**, the context indicates that its **healthcare and pharmacy business** (Amazon Pharmacy) is part of its strategy to provide **""unique customer experiences""** while growing robustly and improving its economics (Source 2). The company emphasizes **AI-driven innovation** and **long-term optimization** for customer and shareholder value, suggesting these businesses will evolve with technology. However, no specific operational or expansion details are provided.",3,Lacks healthcare-specific strategy; broad AI/customer focus only.,True,1.0,-3.157,5,0.2253,5.316,5.5413,hard
+Q020,AMAZON,strategy,vectorless,What is Amazon's strategy for its healthcare and pharmacy business?,"Amazon's strategy for its healthcare and pharmacy business includes:
+
+- **Expansion through acquisitions**: In 2023, Amazon acquired **One Medical (1Life Healthcare, Inc.)** for **$3.5 billion** to provide healthcare options for customers, integrating it into its **North America segment**.
+- **Growth of newer businesses**: The company highlights **Prime Video, Pharmacy, and Grocery** as areas growing robustly, suggesting a focus on scaling its **Pharmacy** business as part of its broader consumer offerings.
+
+*(Source: Amazon, Pages 8 & 67)*",3,Lacks direct healthcare/pharmacy strategy details; acquisitions not cited in context.,True,1.0,-5.1257,5,0.1623,2.0906,2.2529,hard
+Q020,AMAZON,strategy,hybrid,What is Amazon's strategy for its healthcare and pharmacy business?,"For **Amazon**, the context mentions that its **Pharmacy** business is part of its newer offerings, which are **""providing unique customer experiences, growing robustly, and improving their economics""** (Source 2). However, no specific strategic details, financial figures, or long-term plans for the healthcare/pharmacy segment are provided in the retrieved sections.",3,Vague but correct; lacks strategic depth or healthcare-specific focus.,True,1.0,-3.2641,5,0.2922,1.8734,2.1656,hard

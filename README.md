@@ -1,11 +1,12 @@
 ﻿# RAG Benchmark for Financial 10-K Reports
 
-A notebook-driven benchmark comparing two first-stage retrieval strategies for question answering over company 10-K annual reports.
+A notebook-driven benchmark comparing three first-stage retrieval strategies for question answering over company 10-K annual reports.
 
 - `Vector RAG`: semantic retrieval with embeddings stored in ChromaDB
 - `Vectorless RAG`: lexical retrieval with BM25
+- `Hybrid RAG`: fused Vector + BM25 retrieval using Reciprocal Rank Fusion (RRF)
 
-Both pipelines share the same preprocessing, company-aware query handling, reranking stage, and answer-generation model, making the benchmark a focused comparison of first-stage retrieval.
+All pipelines share the same preprocessing, company-aware query handling, reranking stage, and answer-generation model, making the benchmark a focused comparison of first-stage retrieval.
 
 ## What this project does
 
@@ -47,13 +48,14 @@ The benchmark question set is stored in `evaluation/test_questions.json` and con
 - `utils/query_processor.py` detects the target company and cleans the query before retrieval.
 - `vector_rag/` stores dense embeddings in ChromaDB and performs semantic nearest-neighbor retrieval.
 - `vectorless_rag/` uses BM25 keyword search as the first-stage retriever.
-- `reranker.py` uses a cross-encoder to rerank candidates from both pipelines.
+- `hybrid_rag/` fuses vector and BM25 candidate lists via Reciprocal Rank Fusion, then reranks the merged candidates.
+- `reranker.py` uses a cross-encoder to rerank candidates from all pipelines.
 - `llm.py` formats the retrieved context and calls Mistral for answer generation.
-- `evaluation/evaluator.py` scores generated answers with a judge model and writes `evaluation/results/full_results.csv`.
+- `evaluation/evaluator.py` scores generated answers with a judge model and writes evaluation CSV files.
 
-## How the two methods differ
+## How the methods differ
 
-Shared across both methods:
+Shared across all methods:
 
 - same processed chunks
 - same company-aware query preprocessing
@@ -64,8 +66,9 @@ Different first-stage retrieval:
 
 - `Vector RAG`: embedding similarity via ChromaDB + `sentence-transformers/all-MiniLM-L6-v2`
 - `Vectorless RAG`: BM25 lexical search via `rank-bm25`
+- `Hybrid RAG`: fuses vector and BM25 ranked children with Reciprocal Rank Fusion (RRF) before reranking
 
-The benchmark is intentionally designed to isolate first-stage retrieval differences.
+The benchmark is intentionally designed to isolate first-stage retrieval differences while measuring the effect of hybrid fusion.
 
 ## Setup
 
@@ -105,7 +108,8 @@ Notes:
 1. Run `notebooks/01_data_exploration.ipynb` to preprocess the PDF corpus and build both indexes.
 2. Use `notebooks/02_vector_rag.ipynb` to demo the vector retrieval flow.
 3. Use `notebooks/03_vectorless_rag.ipynb` to demo the BM25 retrieval flow.
-4. Use `notebooks/04_comparison.ipynb` to compare the two pipelines and run evaluation.
+4. Use `notebooks/04_comparison.ipynb` to compare the two original pipelines.
+5. Use `notebooks/05_three_way_comparison.ipynb` to benchmark Vector RAG, Vectorless RAG, and Hybrid RAG together.
 
 ### Programmatic usage
 
@@ -141,21 +145,30 @@ pipe.show(result)
 
 ## Current benchmark results
 
-The saved benchmark output in `evaluation/results/full_results.csv` covers the same `20` questions run through both retrieval methods.
+The repository includes both the original two-way benchmark and the newer three-way benchmark artifacts.
 
-Key findings from the current CSV snapshot:
+- `evaluation/results/full_results.csv`: original Vector vs Vectorless benchmark
+- `evaluation/results/three_way_results.csv`: Vector, Vectorless, and Hybrid benchmark details
+- `evaluation/results/three_way_summary.csv`: aggregated summary for all three methods
 
-- `Vector RAG` average judge score: **4.00**
-- `Vector RAG` pass rate: **95%**
+Key summary metrics from `evaluation/results/three_way_summary.csv`:
+
+- `Vector RAG` average judge score: **3.70**
+- `Vector RAG` pass rate: **85%**
 - `Vector RAG` company accuracy: **100%**
-- `Vector RAG` average total time: **3.03s**
+- `Vector RAG` average total time: **3.05s**
 
-- `Vectorless RAG` average judge score: **3.55**
-- `Vectorless RAG` pass rate: **75%**
+- `Vectorless RAG` average judge score: **4.15**
+- `Vectorless RAG` pass rate: **100%**
 - `Vectorless RAG` company accuracy: **100%**
-- `Vectorless RAG` average total time: **2.69s**
+- `Vectorless RAG` average total time: **2.21s**
 
-Both methods currently span the full judge score range from **1 to 5**. In this run, the vector pipeline scored higher on average and had a stronger pass rate, while the BM25 pipeline remained competitive on answer accuracy for many questions and had slightly lower retrieval latency.
+- `Hybrid RAG` average judge score: **3.75**
+- `Hybrid RAG` pass rate: **90%**
+- `Hybrid RAG` company accuracy: **100%**
+- `Hybrid RAG` average total time: **3.02s**
+
+These are snapshot metrics from the current saved results and may change when rerunning the benchmark.
 
 ## Project structure
 
@@ -180,6 +193,9 @@ rag-benchmark/
 |   |-- indexer.py
 |   |-- pipeline.py
 |   |-- retriever.py
+|-- hybrid_rag/
+|   |-- pipeline.py
+|   |-- retriever.py
 |-- evaluation/
 |   |-- evaluator.py
 |   |-- test_questions.json
@@ -201,6 +217,8 @@ rag-benchmark/
 - `vectorless_rag/indexer.py`: builds and loads a BM25 index, with chunk-list fingerprinting.
 - `vectorless_rag/retriever.py`: performs BM25 retrieval with company filtering and reranking.
 - `vectorless_rag/pipeline.py`: pipeline wrapper for the BM25 flow.
+- `hybrid_rag/pipeline.py`: loads vector and BM25 indexes, runs RRF fusion, then reranks and answers.
+- `hybrid_rag/retriever.py`: fuses vector and BM25 ranked children using Reciprocal Rank Fusion (RRF).
 - `utils/query_processor.py`: extracts company and year information from questions.
 - `evaluation/evaluator.py`: runs the benchmark on the question set and scores answers.
 
@@ -216,7 +234,10 @@ rag-benchmark/
 - `data/processed/manifest.json`
 - `data/processed/chunks.json`
 - `vector_rag/chroma_db/` persisted vector store
+- `vectorless_rag/bm25_index.pkl`
 - `evaluation/results/full_results.csv`
+- `evaluation/results/three_way_results.csv`
+- `evaluation/results/three_way_summary.csv`
 - evaluation result charts in `evaluation/results/`
 
 ## Known caveats
@@ -227,4 +248,4 @@ rag-benchmark/
 
 ## Summary
 
-This repository is a compact benchmark showing how semantic retrieval and BM25-based retrieval compare on the same financial 10-K corpus, while sharing chunking, reranking, and answer generation to keep the comparison as fair as possible.
+This repository is a compact benchmark showing how semantic retrieval, BM25-based retrieval, and a hybrid Vector+BM25 fusion compare on the same financial 10-K corpus, while sharing chunking, reranking, and answer generation to keep the comparison as fair as possible.
