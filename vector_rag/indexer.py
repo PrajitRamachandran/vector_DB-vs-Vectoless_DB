@@ -1,102 +1,107 @@
-import json
-import config
+# vector_rag/indexer.py
 import sys
+from pathlib import Path
 from tqdm import tqdm
 import chromadb
 from chromadb.utils import embedding_functions
-from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
-
+import config
 
 
 def get_chroma_collection():
-  """
-  Returns the ChromaDB Colelction. Creates if it doesn't exist.
-  chromaDB persist to disk automatically, no re-embedding on restart
-  """
+    """
+    Creates or loads ChromaDB collection with tuned HNSW parameters.
 
-  client = chromadb.PersistentClient(path=config.CHROMA_PERSISTENT_DIR)
+    HNSW (Hierarchical Navigable Small World) is the ANN algorithm
+    ChromaDB uses internally. Tuning it gives better recall with
+    similar query speed.
 
-  embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=config.EMBEDDING_MODEL)
+    M=32:               more connections in the graph → better navigation
+    construction_ef=200: more candidates examined during build → better index
+    search_ef=100:       more candidates examined during query → better recall
+    """
+    client = chromadb.PersistentClient(path=config.CHROMA_PERSIST_DIR)
 
-  collection = client.get_or_create_collection(
-    name = config.CHROMA_COLLECTION,
-    embedding_function = embedding_fn,
-      metadata = {"hnsw:space":"cosine"}   #used for cosine similarity
-  )
+    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name = config.EMBEDDING_MODEL   # BAAI/bge-base-en-v1.5
+    )
 
-  return collection
-
-def get_indexed_sources(collection)->set[str]:
-  """
-  Asks chormadb which source files are already indexed, to avoid re-embeddings
-  """
-
-  results = collection.get(include=["metadatas"])
-
-  if not results["metadatas"]:
-    return set()
-  
-  return {m["source"] for m in results["metadatas"]}
-
-def index_chunks(chunks:list[dict]):
-  """
-  Embeds and stores chunks in chromadb. skips already indexed sources.
-  """
-
-  print("="*52)
-  print("Phase 3A : Vector RAG INDEXER (CHROMADB")
-  print("="*52)
-
-  collection = get_chroma_collection()
-  indexed_sources = get_indexed_sources(collection)
-
-  new_chunks = [
-    c for c in chunks
-    if c["source"] not in indexed_sources
-  ]
-
-  if not new_chunks:
-    total = collection.count()
-    print(f"\n✅ ChromaDB already up to date.")
-    print(f"   {total} vectors in index — nothing to add.\n")
+    collection = client.get_or_create_collection(
+        name               = config.CHROMA_COLLECTION,
+        embedding_function = embedding_fn,
+        metadata           = {
+            "hnsw:space"          : "cosine",
+            "hnsw:M"              : config.HNSW_M,
+            "hnsw:construction_ef": config.HNSW_CONSTRUCTION_EF,
+            "hnsw:search_ef"      : config.HNSW_SEARCH_EF,
+        }
+    )
     return collection
-  
-  print(f"\n📥 Already indexed: {indexed_sources or 'nothing yet'}")
-  print(f"📤 Chunks to embed:  {len(new_chunks)}\n")
 
-  batch_size = 50
 
-  for i in tqdm(range(0, len(new_chunks), batch_size), desc="Embedding & Indexing"):
-    batch = new_chunks[i:i + batch_size]
+def get_indexed_sources(collection) -> set:
+    results = collection.get(include=["metadatas"])
+    if not results["metadatas"]:
+        return set()
+    return {m["source"] for m in results["metadatas"]}
 
-    collection.upsert(
-    ids=[str(c["chunk_id"]) for c in batch],
-    documents=[c["text"] for c in batch],
-    metadatas=[
-        {
-            "source": c["source"],
-            "company": c["company"],
-            "page": c["page"],
-            "chunk_id": c["chunk_id"]
-        }for c in batch])
-    
-  print(f"\n✅ ChromaDB index updated.")
-  print(f"   Total vectors in index: {collection.count()}\n")
 
-  return collection
+def index_chunks(data: dict):
+    """
+    Indexes CHILDREN into ChromaDB (small = precise retrieval).
+    Stores parent_id in metadata so retriever can look up parent context.
+    """
+    print("=" * 52)
+    print("   VECTOR RAG INDEXER — Parent-Child + BGE + HNSW")
+    print("=" * 52)
+
+    collection      = get_chroma_collection()
+    indexed_sources = get_indexed_sources(collection)
+    children        = data["children"]
+
+    new_children = [c for c in children
+                    if c["source"] not in indexed_sources]
+
+    if not new_children:
+        print(f"\n✅ ChromaDB already up to date — {collection.count()} vectors\n")
+        return collection
+
+    print(f"\n📤 Indexing {len(new_children)} child chunks...")
+    print(f"   Embedding model: {config.EMBEDDING_MODEL}")
+
+    BATCH_SIZE = 64   # BGE base is slightly heavier — smaller batch
+
+    for i in tqdm(range(0, len(new_children), BATCH_SIZE),
+                  desc="Embedding children"):
+        batch = new_children[i: i + BATCH_SIZE]
+
+        collection.upsert(
+            ids       = [c["chunk_id"] for c in batch],
+            documents = [c["text"]     for c in batch],
+            metadatas = [{
+                "source"   : c["source"],
+                "company"  : c["company"],
+                "page"     : c["page"],
+                "parent_id": c["parent_id"],   # ← key for context lookup
+                "type"     : "child"
+            } for c in batch]
+        )
+
+    print(f"\n✅ ChromaDB updated — {collection.count()} total vectors\n")
+    return collection
+
+
+def build_parent_lookup(data: dict) -> dict:
+    """
+    Builds a fast dict: parent_id → parent chunk
+    Used by the retriever to swap children for their parent context.
+    """
+    return {p["chunk_id"]: p for p in data["parents"]}
 
 
 def load_index():
-  """
-  loads all existing chormadb index
-  """
-
-  collection = get_chroma_collection()
-  count = collection.count()
-
-  if count==0:
-    raise RuntimeError(f"ChromaDB index is empty. Run the index_chunks() first.")
-  
-  print(f"✅ Loaded ChromaDB index: {count} vectors.")
-  return collection
+    collection = get_chroma_collection()
+    if collection.count() == 0:
+        raise RuntimeError("ChromaDB is empty. Run index_chunks() first.")
+    print(f"✅ ChromaDB loaded — {collection.count()} child vectors")
+    return collection

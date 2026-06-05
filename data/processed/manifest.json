@@ -1,26 +1,26 @@
 {
   "amazon_10k.pdf": {
     "hash": "9ce14026d33e33b86985da7b29a87086",
-    "processed_at": "2026-06-03T18:04:39.917799",
-    "chunks_count": 442,
-    "pages_count": 90
+    "processed_at": "2026-06-05T12:18:13.752091",
+    "parents_count": 410,
+    "children_count": 1468
   },
   "microsoft_10k.pdf": {
     "hash": "5bb6a471ac6f08757bcb3cf3f96efe64",
-    "processed_at": "2026-06-03T18:04:42.482939",
-    "chunks_count": 671,
-    "pages_count": 156
+    "processed_at": "2026-06-05T12:18:16.942536",
+    "parents_count": 629,
+    "children_count": 2242
   },
   "netflix_10k.pdf": {
     "hash": "b829b52858cd2a2cffd1c1bcf04e2d58",
-    "processed_at": "2026-06-03T18:04:42.771823",
-    "chunks_count": 552,
-    "pages_count": 121
+    "processed_at": "2026-06-05T12:18:17.281516",
+    "parents_count": 536,
+    "children_count": 2289
   },
   "nvidia_10k.pdf": {
     "hash": "d16543b9ca44f86baf6d9933dd97058d",
-    "processed_at": "2026-06-03T18:04:42.961475",
-    "chunks_count": 443,
-    "pages_count": 93
+    "processed_at": "2026-06-05T12:18:17.509803",
+    "parents_count": 435,
+    "children_count": 1914
   }
 }

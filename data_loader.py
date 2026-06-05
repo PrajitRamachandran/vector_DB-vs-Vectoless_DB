@@ -128,122 +128,168 @@ def clean_text(text: str) -> str:
 # ─────────────────────────────────────────────────────────
 # CHUNKING
 # ─────────────────────────────────────────────────────────
+# In data_loader.py — replace chunk_pages() with these two functions
 
-def chunk_pages(pages: list[dict], start_chunk_id: int = 0) -> list[dict]:
+def chunk_pages_hierarchical(pages: list[dict],
+                              start_parent_id: int = 0) -> tuple[list, list]:
     """
-    Splits page text into overlapping chunks.
-    start_chunk_id ensures chunk IDs are globally unique across all PDFs —
-    so adding new PDFs never creates ID collisions.
+    Creates two levels of chunks from each page:
+
+    PARENT chunks (1000 chars)
+    └── CHILD chunks (300 chars) — each knows its parent ID
+
+    Retrieval flow:
+        query → find best children → return their parents to LLM
+        Small children = precise match | Large parents = rich context
     """
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size    = config.CHUNK_SIZE,
-        chunk_overlap = config.CHUNK_OVERLAP,
+    parent_splitter = RecursiveCharacterTextSplitter(
+        chunk_size    = config.PARENT_CHUNK_SIZE,
+        chunk_overlap = config.PARENT_CHUNK_OVERLAP,
+        separators    = ["\n\n", "\n", ". ", " ", ""]
+    )
+    child_splitter = RecursiveCharacterTextSplitter(
+        chunk_size    = config.CHILD_CHUNK_SIZE,
+        chunk_overlap = config.CHILD_CHUNK_OVERLAP,
         separators    = ["\n\n", "\n", ". ", " ", ""]
     )
 
-    all_chunks = []
-    chunk_id   = start_chunk_id
+    parents  = []
+    children = []
+    parent_id = start_parent_id
+    child_id  = 0
 
     for page in pages:
-        page["text"] = clean_text(page["text"])
-        raw_chunks   = splitter.split_text(page["text"])
+        page["text"]   = clean_text(page["text"])
+        parent_texts   = parent_splitter.split_text(page["text"])
 
-        for i, chunk_text in enumerate(raw_chunks):
-            if len(chunk_text.strip()) < 30:   # skip tiny meaningless chunks
+        for parent_text in parent_texts:
+            if len(parent_text.strip()) < 60:
                 continue
 
-            all_chunks.append({
-                "chunk_id"  : chunk_id,
-                "text"      : chunk_text,
-                "source"    : page["source"],
-                "company"   : page["company"],
-                "page"      : page["page"],
-                "chunk_num" : i
-            })
-            chunk_id += 1
+            parent = {
+                "chunk_id" : f"parent_{parent_id}",
+                "text"     : parent_text,
+                "source"   : page["source"],
+                "company"  : page["company"],
+                "page"     : page["page"],
+                "type"     : "parent"
+            }
+            parents.append(parent)
 
-    return all_chunks
+            # Split each parent into children
+            child_texts = child_splitter.split_text(parent_text)
+            for child_text in child_texts:
+                if len(child_text.strip()) < 30:
+                    continue
+                children.append({
+                    "chunk_id" : f"child_{child_id}",
+                    "text"     : child_text,
+                    "parent_id": f"parent_{parent_id}",
+                    "source"   : page["source"],
+                    "company"  : page["company"],
+                    "page"     : page["page"],
+                    "type"     : "child"
+                })
+                child_id += 1
+
+            parent_id += 1
+
+    return parents, children
 
 
 # ─────────────────────────────────────────────────────────
 # LOAD / SAVE CHUNKS
 # ─────────────────────────────────────────────────────────
 
-def load_existing_chunks() -> list[dict]:
-    if CHUNKS_PATH.exists():
-        with open(CHUNKS_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
-
-
-def save_chunks(chunks: list[dict]):
+def save_chunks(data: dict):
+    """Saves parents and children separately."""
     Path(config.DATA_PROCESSED_DIR).mkdir(parents=True, exist_ok=True)
     with open(CHUNKS_PATH, "w", encoding="utf-8") as f:
-        json.dump(chunks, f, indent=2, ensure_ascii=False)
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def load_existing_chunks() -> dict:
+    if not CHUNKS_PATH.exists():
+        return {"parents": [], "children": []}
+    with open(CHUNKS_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    # Handle old flat format (upgrade path)
+    if isinstance(data, list):
+        print("⚠️  Old chunk format detected — rebuilding with parent-child structure")
+        return {"parents": [], "children": []}
+    return data
 
 
 # ─────────────────────────────────────────────────────────
 # MAIN PIPELINE — run this every time
 # ─────────────────────────────────────────────────────────
-
-def run_preprocessing_pipeline() -> list[dict]:
+def run_preprocessing_pipeline() -> dict:
     """
-    Smart incremental pipeline:
-    - First run  → processes all 4 PDFs
-    - Later runs → only processes new or changed PDFs
-    - Always returns the full chunk list
+    Returns both parents and children so indexers can use them correctly:
+    - Children → indexed in ChromaDB + BM25 (precise retrieval)
+    - Parents  → stored for context lookup (rich LLM input)
     """
     print("=" * 52)
     print("   PHASE 2 — SCALABLE PREPROCESSING PIPELINE")
     print("=" * 52)
 
-    manifest       = load_manifest()
-    existing_chunks = load_existing_chunks()
-    new_pdfs       = get_new_pdfs(config.DATA_RAW_DIR, manifest)
+    manifest        = load_manifest()
+    existing_data   = load_existing_chunks()  # now returns dict
+    new_pdfs        = get_new_pdfs(config.DATA_RAW_DIR, manifest)
 
     if not new_pdfs:
         print(f"\n✅ Nothing new to process.")
-        print(f"   Loaded {len(existing_chunks)} existing chunks from cache.\n")
-        return existing_chunks
+        print(f"   Parents : {len(existing_data.get('parents', []))}")
+        print(f"   Children: {len(existing_data.get('children', []))}\n")
+        return existing_data
 
     print(f"\n📂 Processing {len(new_pdfs)} new PDF(s)...\n")
 
-    # Remove old chunks for any PDFs being re-processed (changed files)
-    new_pdf_names   = [p.name for p in new_pdfs]
-    existing_chunks = [
-        c for c in existing_chunks
-        if c["source"] not in new_pdf_names
-    ]
+    new_pdf_names = [p.name for p in new_pdfs]
 
-    # Process each new PDF
-    start_id   = max((c["chunk_id"] for c in existing_chunks), default=-1) + 1
-    all_new_chunks = []
+    # Remove stale chunks from re-processed PDFs
+    old_parents  = [c for c in existing_data.get("parents",  [])
+                    if c["source"] not in new_pdf_names]
+    old_children = [c for c in existing_data.get("children", [])
+                    if c["source"] not in new_pdf_names]
+
+    # Start IDs after existing
+    existing_parent_ids = [
+        int(p["chunk_id"].replace("parent_", ""))
+        for p in old_parents if "parent_" in p.get("chunk_id", "")
+    ]
+    start_id = max(existing_parent_ids, default=-1) + 1
+
+    all_new_parents  = []
+    all_new_children = []
 
     for pdf_path in tqdm(new_pdfs, desc="Processing PDFs"):
-        pages      = extract_text_from_pdf(pdf_path)
-        new_chunks = chunk_pages(pages, start_chunk_id=start_id)
+        pages        = extract_text_from_pdf(pdf_path)
+        new_p, new_c = chunk_pages_hierarchical(pages, start_parent_id=start_id)
 
-        # Update manifest
         manifest[pdf_path.name] = {
-            "hash"         : get_file_hash(str(pdf_path)),
-            "processed_at" : datetime.now().isoformat(),
-            "chunks_count" : len(new_chunks),
-            "pages_count"  : len(pages)
+            "hash"          : get_file_hash(str(pdf_path)),
+            "processed_at"  : datetime.now().isoformat(),
+            "parents_count" : len(new_p),
+            "children_count": len(new_c)
         }
-
         print(f"   ✅ {pdf_path.stem.upper()}: "
-              f"{len(pages)} pages → {len(new_chunks)} chunks")
+              f"{len(pages)} pages → {len(new_p)} parents, {len(new_c)} children")
 
-        start_id       += len(new_chunks)
-        all_new_chunks += new_chunks
+        start_id         += len(new_p)
+        all_new_parents  += new_p
+        all_new_children += new_c
 
-    # Merge old + new chunks and save
-    final_chunks = existing_chunks + all_new_chunks
-    save_chunks(final_chunks)
+    final = {
+        "parents" : old_parents  + all_new_parents,
+        "children": old_children + all_new_children
+    }
+
+    save_chunks(final)
     save_manifest(manifest)
 
-    print(f"\n💾 Saved {len(final_chunks)} total chunks to {CHUNKS_PATH}")
-    print(f"📋 Manifest updated: {len(manifest)} PDFs tracked")
+    print(f"\n💾 Saved {len(final['parents'])} parents, "
+          f"{len(final['children'])} children")
+    print(f"📋 Manifest: {len(manifest)} PDFs tracked")
     print("\n🎉 Preprocessing complete!\n")
-
-    return final_chunks
+    return final
