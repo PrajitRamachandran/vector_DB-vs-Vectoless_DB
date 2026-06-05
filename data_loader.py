@@ -128,10 +128,12 @@ def clean_text(text: str) -> str:
 # ─────────────────────────────────────────────────────────
 # CHUNKING
 # ─────────────────────────────────────────────────────────
-# In data_loader.py — replace chunk_pages() with these two functions
 
-def chunk_pages_hierarchical(pages: list[dict],
-                              start_parent_id: int = 0) -> tuple[list, list]:
+def chunk_pages_hierarchical(
+    pages:            list[dict],
+    start_parent_id:  int = 0,
+    start_child_id:   int = 0,      # ← FIX: was hardcoded to 0 inside the fn
+) -> tuple[list, list]:
     """
     Creates two levels of chunks from each page:
 
@@ -141,6 +143,12 @@ def chunk_pages_hierarchical(pages: list[dict],
     Retrieval flow:
         query → find best children → return their parents to LLM
         Small children = precise match | Large parents = rich context
+
+    Bug fixed: start_child_id must be passed in from the caller so that
+    children from different PDFs receive globally unique IDs.
+    Without this, every PDF restarts from child_0, causing ChromaDB upsert
+    to silently overwrite earlier PDFs' data — leaving Amazon and Microsoft
+    with zero vectors in the index while only Netflix/NVIDIA are retained.
     """
     parent_splitter = RecursiveCharacterTextSplitter(
         chunk_size    = config.PARENT_CHUNK_SIZE,
@@ -156,7 +164,7 @@ def chunk_pages_hierarchical(pages: list[dict],
     parents  = []
     children = []
     parent_id = start_parent_id
-    child_id  = 0
+    child_id  = start_child_id     # ← FIX: was `child_id = 0`
 
     for page in pages:
         page["text"]   = clean_text(page["text"])
@@ -253,19 +261,34 @@ def run_preprocessing_pipeline() -> dict:
     old_children = [c for c in existing_data.get("children", [])
                     if c["source"] not in new_pdf_names]
 
-    # Start IDs after existing
+    # ── Compute globally unique starting IDs ──────────────────────────────────
+    # Parent IDs: already correctly tracked in the original code
     existing_parent_ids = [
         int(p["chunk_id"].replace("parent_", ""))
         for p in old_parents if "parent_" in p.get("chunk_id", "")
     ]
     start_id = max(existing_parent_ids, default=-1) + 1
 
+    # Child IDs: FIX — must also be globally unique across all PDFs.
+    # Previously child_id always started at 0 inside chunk_pages_hierarchical,
+    # so every PDF produced child_0, child_1, … causing ChromaDB upsert to
+    # overwrite earlier companies' vectors with later companies' data.
+    existing_child_ids = [
+        int(c["chunk_id"].replace("child_", ""))
+        for c in old_children if "child_" in c.get("chunk_id", "")
+    ]
+    start_child_id = max(existing_child_ids, default=-1) + 1
+
     all_new_parents  = []
     all_new_children = []
 
     for pdf_path in tqdm(new_pdfs, desc="Processing PDFs"):
         pages        = extract_text_from_pdf(pdf_path)
-        new_p, new_c = chunk_pages_hierarchical(pages, start_parent_id=start_id)
+        new_p, new_c = chunk_pages_hierarchical(
+            pages,
+            start_parent_id = start_id,
+            start_child_id  = start_child_id,   # ← FIX: pass unique start
+        )
 
         manifest[pdf_path.name] = {
             "hash"          : get_file_hash(str(pdf_path)),
@@ -277,6 +300,7 @@ def run_preprocessing_pipeline() -> dict:
               f"{len(pages)} pages → {len(new_p)} parents, {len(new_c)} children")
 
         start_id         += len(new_p)
+        start_child_id   += len(new_c)    # ← FIX: advance the child counter
         all_new_parents  += new_p
         all_new_children += new_c
 
