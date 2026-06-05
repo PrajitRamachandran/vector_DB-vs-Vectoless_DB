@@ -7,7 +7,7 @@ class RateLimiter:
     Ensures a minimum gap between requests to stay under RPM limits.
 
     Usage:
-        limiter = RateLimiter(max_rpm=18, name="Groq")
+        limiter = RateLimiter(max_rpm=18, name="Mistral")
         limiter.wait()   # call this BEFORE every API request
         response = client.call(...)
     """

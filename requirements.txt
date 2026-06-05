@@ -6,7 +6,6 @@ langchain
 langchain-text-splitters
 langchain-community
 langchain-huggingface
-langchain-groq  
 
 # Vector RAG
 sentence-transformers
@@ -22,7 +21,7 @@ torch
 einops
 
 # Cloud LLM
-groq  
+openai
 
 # Evaluation
 ragas
