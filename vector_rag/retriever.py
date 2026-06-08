@@ -106,7 +106,9 @@ def retrieve(
 
     query_info   = preprocess_query(query)
     company      = query_info["company"]
-    raw_query    = query_info["original"] or query
+    # Use the cleaned retrieval query: company/year are handled separately and
+    # removing them tends to improve dense retrieval focus for financial QA.
+    raw_query    = query_info["clean_query"] or query_info["original"] or query
 
     # Build the BGE-prefixed query string (fix #1)
     bge_q = _bge_query(raw_query)

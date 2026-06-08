@@ -66,7 +66,8 @@ QUESTIONS_DIR = str(_ROOT / "evaluation" / "test_questions.json")
 
 # Generation
 MAX_NEW_TOKENS = 512
-TEMPERATURE = 0.1
+# Keep generation deterministic for benchmark-style QA.
+TEMPERATURE = 0.0
 DO_SAMPLE = False
 
 # Judge generation

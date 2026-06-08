@@ -250,10 +250,11 @@ def retrieve(
     start_time = time.perf_counter()
     query_info = preprocess_query(query)
     company    = query_info["company"]
+    clean_query = query_info["clean_query"] or query_info["original"] or query
 
     # ── First-stage: both retrievers ─────────────────────────────────────────
     vector_start    = time.perf_counter()
-    vector_children = _vector_fetch(query, collection, company)
+    vector_children = _vector_fetch(clean_query, collection, company)
     vector_latency  = time.perf_counter() - vector_start
 
     bm25_start      = time.perf_counter()

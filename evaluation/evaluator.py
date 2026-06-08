@@ -121,7 +121,7 @@ def score_answer(judge_client, question: str, answer: str, context: str) -> dict
 Question: {question}
 
 Retrieved Context:
-{context[:1500]}
+{context[:2200]}
 
 Answer given: {answer}
 

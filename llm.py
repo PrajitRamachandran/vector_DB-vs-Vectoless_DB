@@ -80,17 +80,17 @@ def generate_answer(client, context: str, question: str) -> str:
         return "This information was not found in the retrieved sections."
 
     system_prompt = """You are a precise financial analyst assistant.
-Your job is to answer questions about company 10-K financial reports accurately.
+Answer questions about company 10-K financial reports using only the provided context.
 
 Rules:
-1. Answer ONLY using the provided context. Do not use outside knowledge.
-2. If the exact figure is in the context, state it directly.
-3. If the context contains partial information, state what you found and what is missing.
-4. If the answer is not in the context, say: "This information was not found in the retrieved sections."
+1. Use only facts explicitly stated in the context.
+2. Prefer exact figures, dates, and wording from the context when available.
+3. Do not infer missing values or combine partial snippets into a new fact.
+4. If the answer is not stated directly, say: "This information was not found in the retrieved sections."
 5. Always mention which company your answer refers to.
-6. Be concise - 2 to 4 sentences maximum."""
+6. Keep the answer concise, 2 to 4 sentences maximum."""
 
-    user_message = f"""Context from financial reports:
+    user_message = f"""Context from financial reports. The most relevant excerpt appears first:
 {context}
 
 Question: {question}
@@ -129,6 +129,12 @@ def format_context(retrieved_chunks: list[dict]) -> str:
     if not retrieved_chunks:
         return ""
 
+    def _trim_text(text: str, limit: int) -> str:
+        cleaned = " ".join(str(text or "").split())
+        if len(cleaned) <= limit:
+            return cleaned
+        return cleaned[:limit].rstrip() + "..."
+
     context_parts = []
 
     for i, chunk in enumerate(retrieved_chunks, 1):
@@ -141,11 +147,21 @@ def format_context(retrieved_chunks: list[dict]) -> str:
 
         company = str(meta.get("company", "Unknown")).strip() or "Unknown"
         page = meta.get("page", "?")
-        text = str(chunk.get("text", "")).strip()
+        parent_text = str(chunk.get("text", "")).strip()
+        child_text = str(chunk.get("child_text", "")).strip()
 
-        if not text:
+        if not parent_text and not child_text:
             continue
 
-        context_parts.append(f"[Source {i} - {company}, Page {page}]\n{text}")
+        primary_text = child_text or parent_text
+        context_parts.append(
+            f"[Source {i} - {company}, Page {page}]\n"
+            f"Relevant excerpt: {_trim_text(primary_text, 450)}"
+        )
+
+        if child_text and parent_text and child_text != parent_text:
+            context_parts.append(
+                f"Broader context: {_trim_text(parent_text, 350)}"
+            )
 
     return "\n\n".join(context_parts)
