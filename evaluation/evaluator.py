@@ -185,6 +185,7 @@ Return ONLY valid JSON in this exact schema:
 
 
 def compute_retrieval_metrics(question_company: str, retrieved_chunks: list[dict]) -> dict:
+    question_company = (question_company or "").strip().upper()
     if not retrieved_chunks:
         return {
             "company_accuracy": 0.0,
@@ -193,7 +194,10 @@ def compute_retrieval_metrics(question_company: str, retrieved_chunks: list[dict
             "total_chunks": 0,
         }
 
-    companies = [c.get("metadata", {}).get("company", "") for c in retrieved_chunks]
+    companies = [
+        str(c.get("metadata", {}).get("company", "")).strip().upper()
+        for c in retrieved_chunks
+    ]
     correct = sum(1 for c in companies if c == question_company)
     total = len(retrieved_chunks)
 
@@ -215,12 +219,27 @@ def compute_retrieval_metrics(question_company: str, retrieved_chunks: list[dict
     }
 
 
+def _extract_context_strings(retrieved_chunks: list[dict]) -> list[str]:
+    """
+    Converts a list of retrieved chunk dicts into a flat list of plain text
+    strings suitable for RAGAS.  Each chunk is expected to have a 'text' key
+    (set by the parent-child swap) or falls back to 'content'.
+    """
+    texts: list[str] = []
+    for chunk in retrieved_chunks:
+        text = chunk.get("text") or chunk.get("content") or ""
+        if isinstance(text, str) and text.strip():
+            texts.append(text.strip())
+    return texts if texts else ["No context retrieved."]
+
+
 def run_evaluation(
     vector_pipeline,
     vectorless_pipeline,
     hybrid_pipeline=None,          # ← optional; pass None to skip
     results_filename: str = "full_results.csv",
-) -> pd.DataFrame:
+    capture_contexts: bool = False,
+) -> tuple[pd.DataFrame, dict] | pd.DataFrame:
     """
     Runs all active pipelines on every question with rate limiting.
 
@@ -231,6 +250,21 @@ def run_evaluation(
     4. [judge limiter]      → score_answer() × 3
 
     Pass hybrid_pipeline=None to run only vector + vectorless (original behaviour).
+
+    Parameters
+    ----------
+    capture_contexts : bool
+        When True, also returns a dict keyed by (question_id, method) whose
+        values are lists of plain-text context strings.  This dict is used by
+        run_ragas_evaluation() to avoid re-running retrieval.
+        Default is False to preserve the original return type (pd.DataFrame only).
+
+    Returns
+    -------
+    If capture_contexts=False (default):
+        pd.DataFrame  — the judge results (original behaviour, unchanged)
+    If capture_contexts=True:
+        (pd.DataFrame, dict)  — judge results + retrieved_contexts_map
     """
     if not QUESTIONS_PATH.exists():
         raise FileNotFoundError(f"Questions file not found: {QUESTIONS_PATH}")
@@ -254,6 +288,8 @@ def run_evaluation(
 
     n_methods = len(active_pipelines)
     records   = []
+    # context capture: {(qid, method): [str, ...]}
+    retrieved_contexts_map: dict[tuple[str, str], list[str]] = {}
     total     = len(questions)
 
     print(f"\n{'=' * 55}")
@@ -261,6 +297,8 @@ def run_evaluation(
     print(f"   Methods         : {', '.join(m for m, _ in active_pipelines)}")
     print(f"   Generation limit: {config.MISTRAL_RPM} RPM")
     print(f"   Judge limit     : {config.MISTRAL_JUDGE_RPM} RPM")
+    if capture_contexts:
+        print("   Context capture : ON  (for RAGAS)")
     print(f"{'=' * 55}\n")
 
     from llm import format_context
@@ -285,9 +323,18 @@ def run_evaluation(
                     "answer"         : f"ERROR: {e}",
                     "retrieved"      : [],
                     "retrieval_time" : 0,
+                    "rerank_time"    : 0,
                     "generation_time": 0,
                     "total_time"     : 0,
                 }
+
+        # ── Capture context strings for RAGAS ─────────────────────────────────
+        if capture_contexts:
+            for method_name, result in pipeline_results.items():
+                key = (str(qid), method_name)
+                retrieved_contexts_map[key] = _extract_context_strings(
+                    result.get("retrieved", [])
+                )
 
         # ── Judge pass ────────────────────────────────────────────────────────
         judge_scores = {}
@@ -322,6 +369,7 @@ def run_evaluation(
                     "avg_chunk_score" : ret_metrics["avg_score"],
                     "correct_chunks"  : ret_metrics["correct_chunks"],
                     "retrieval_time"  : result.get("retrieval_time", 0),
+                    "rerank_time"     : result.get("rerank_time", result.get("rerank_latency", 0)),
                     "generation_time" : result.get("generation_time", 0),
                     "total_time"      : result.get("total_time", 0),
                 }
@@ -332,6 +380,9 @@ def run_evaluation(
     out_path = RESULTS_DIR / results_filename
     df.to_csv(out_path, index=False, encoding="utf-8")
     print(f"\nResults saved → {out_path}")
+
+    if capture_contexts:
+        return df, retrieved_contexts_map
     return df
 
 
@@ -367,6 +418,8 @@ def print_summary(df: pd.DataFrame):
         print(f"  Pass rate  (>=3)   : {m['pass'].mean() * 100:.1f}%")
         print(f"  Company accuracy   : {m['company_accuracy'].mean() * 100:.1f}%")
         print(f"  Avg retrieval time : {m['retrieval_time'].mean():.4f}s")
+        rerank_mean = m["rerank_time"].mean() if "rerank_time" in m.columns else 0.0
+        print(f"  Avg rerank time    : {rerank_mean:.4f}s")
         print(f"  Avg generation time: {m['generation_time'].mean():.2f}s")
         print(f"  Avg total latency  : {m['total_time'].mean():.2f}s")
 

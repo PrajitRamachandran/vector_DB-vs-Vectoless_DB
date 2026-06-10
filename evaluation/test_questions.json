@@ -1,709 +1,169 @@
 {
   "metadata": {
-    "total_questions": 100,
+    "total_questions": 20,
     "companies": ["NVIDIA", "MICROSOFT", "NETFLIX", "AMAZON"],
     "categories": ["financial_metrics", "risk_factors", "business_segments", "strategy"]
   },
   "questions": [
   {
-    "id": "Q001",
-    "company": "NVIDIA",
-    "question": "What was NVIDIA's total revenue for fiscal year 2026?",
+    "id": "1",
+    "company": "Amazon",
+    "question": "What was Amazon's free cash flow for 2025, and how is it calculated based on its cash flow reconciliation?",
     "category": "financial_metrics",
-    "difficulty": "easy"
+    "difficulty": "hard",
+    "reference_answer": "Free cash flow for 2025 was $11,194 million, calculated as net cash provided by operating activities of $139,514 million less purchases of property and equipment, net of proceeds from sales and incentives of $128,320 million."
   },
   {
-    "id": "Q002",
-    "company": "NVIDIA",
-    "question": "How much revenue did NVIDIA generate from each reportable segment, Compute & Networking and Graphics, in fiscal year 2026?",
-    "category": "segment_analysis",
-    "difficulty": "medium"
+    "id": "2",
+    "company": "Microsoft",
+    "question": "According to microsoft_10k.pdf, what were Microsoft's gross unrecognized tax benefits related to uncertain tax positions as of June 30, 2025, and how much of this tax benefit would affect the effective tax rate if recognized?",
+    "category": "financial_metrics",
+    "difficulty": "hard",
+    "reference_answer": "Gross unrecognized tax benefits were $24.7 billion, and $21.2 billion of the resulting tax benefit would affect the effective tax rate if recognized."
   },
   {
-    "id": "Q003",
-    "company": "NVIDIA",
-    "question": "What factors did NVIDIA say drove the year-over-year increase in Compute & Networking revenue in fiscal year 2026?",
-    "category": "business_drivers",
-    "difficulty": "hard"
+    "id": "3",
+    "company": "Amazon",
+    "question": "What was the carrying value of Amazon's equity investments in private companies not accounted for under the equity-method as of December 31, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "hard",
+    "reference_answer": "As of December 31, 2025, these investments had a carrying value of $16.2 billion."
   },
   {
-    "id": "Q004",
+    "id": "4",
+    "company": "Microsoft",
+    "question": "What was the total amount of Microsoft's lease commitments that had not yet commenced as of June 30, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "hard",
+    "reference_answer": "As of June 30, 2025, Microsoft had additional leases, primarily for datacenters, that had not yet commenced of $92.7 billion."
+  },
+  {
+    "id": "5",
+    "company": "Netflix",
+    "question": "What was the constant currency percentage change in streaming revenues for Netflix's LATAM region for the year ended December 31, 2025 compared to the prior year?",
+    "category": "company_performance",
+    "difficulty": "hard",
+    "reference_answer": "The constant currency percentage change in streaming revenues for the LATAM region was 23%."
+  },
+  {
+    "id": "6",
     "company": "NVIDIA",
-    "question": "Which customer concentration risk did NVIDIA disclose for fiscal year 2026, and what percentages of total revenue did its two largest direct customers represent?",
+    "question": "What was the net effect on NVIDIA's gross margin from inventory provisions and sales of items previously written down in fiscal year 2026?",
+    "category": "company_performance",
+    "difficulty": "hard",
+    "reference_answer": "The net effect on our gross margin from inventory provisions and sales of items previously written down was an unfavorable impact of 2.6% in fiscal year 2026."
+  },
+  {
+    "id": "7",
+    "company": "Netflix",
+    "question": "According to netflix_10k.pdf, what were the primary operational and financial drivers for the increase in Netflix's net income for the year ended December 31, 2025?",
+    "category": "company_performance",
+    "difficulty": "hard",
+    "reference_answer": "The increase was primarily due to a $2,909 million increase in operating income, driven by a $6,182 million increase in revenues, which was partially offset by a $2,237 million increase in cost of revenues (primarily due to the increase in content amortization and other cost of revenues) and a $487 million increase in the provision for income taxes."
+  },
+  {
+    "id": "8",
+    "company": "NVIDIA",
+    "question": "What was the total revenue generated from NVIDIA's Professional Visualization specialized market for fiscal year 2026 compared to fiscal year 2025?",
+    "category": "company_performance",
+    "difficulty": "hard",
+    "reference_answer": "NVIDIA's Professional Visualization revenue was $3,191 million for fiscal year 2026 compared to $1,878 million for fiscal year 2025."
+  },
+  {
+    "id": "9",
+    "company": "Amazon",
+    "question": "What is the delivery time frame for Amazon Now, and what impact has it had on Prime members' shopping behavior in India?",
+    "category": "business_operations",
+    "difficulty": "hard",
+    "reference_answer": "Amazon Now is ultra-fast delivery on thousands of items within 20 minutes. In India, Amazon Now orders are increasing 25% month-over-month, with Prime members tripling their shopping frequency once they start using it."
+  },
+  {
+    "id": "10",
+    "company": "Microsoft",
+    "question": "According to microsoft_10k.pdf, what was the financial impact on depreciation and amortization expense and net income for the year ended June 30, 2025, due to the change in estimate of the useful lives of Microsoft's servers and networking equipment?",
+    "category": "business_operations",
+    "difficulty": "hard",
+    "reference_answer": "was an increase in depreciation and amortization expense of $1.4 billion and a reduction in net income of $1.0 billion, or $0.10 per basic share and $0.10 per diluted share"
+  },
+  {
+    "id": "11",
+    "company": "Amazon",
+    "question": "What was the total owned square footage operated by Amazon internationally for fulfillment, data centers, and other purposes as of December 31, 2025?",
+    "category": "business_operations",
+    "difficulty": "hard",
+    "reference_answer": "Amazon operated 20,660 thousand owned square footage internationally for fulfillment, data centers, and other facilities."
+  },
+  {
+    "id": "12",
+    "company": "Microsoft",
+    "question": "What was the total square footage of Microsoft's properties owned and leased domestically (U.S.) and internationally as of June 30, 2025?",
+    "category": "business_operations",
+    "difficulty": "hard",
+    "reference_answer": "In the U.S., Microsoft owned 34 million square feet and leased 23 million square feet (Total 57 million). Internationally, it owned 13 million square feet and leased 27 million square feet (Total 40 million)."
+  },
+  {
+    "id": "13",
+    "company": "NVIDIA",
+    "question": "What financial impact did the US government's export license requirement for H20 integrated circuits to China have on NVIDIA in the first quarter of fiscal year 2026?",
     "category": "risk_factors",
-    "difficulty": "hard"
+    "difficulty": "hard",
+    "reference_answer": "We incurred a $4.5 billion charge in the first quarter of fiscal year 2026 associated with H20 for excess inventory and purchase obligations, as the demand for H20 products diminished."
   },
   {
-    "id": "Q005",
-    "company": "NVIDIA",
-    "question": "What was the maximum gross exposure under NVIDIA's partner facility lease guarantees, and how much cash was placed in escrow to mitigate that exposure?",
-    "category": "commitments_and_contingencies",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q006",
-    "company": "Amazon",
-    "question": "What was Amazon's consolidated net sales for the year ended December 31, 2025?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q007",
-    "company": "Amazon",
-    "question": "What was Amazon's operating income in each segment for 2025: North America, International, and AWS?",
-    "category": "segment_analysis",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q008",
-    "company": "Amazon",
-    "question": "How much unearned revenue did Amazon have at December 31, 2025, and how much of the prior year's unearned revenue was recognized during 2025?",
-    "category": "revenue_recognition",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q009",
-    "company": "Amazon",
-    "question": "What did Amazon say were the main reasons for the increase in capital expenditures in 2025, and which business area absorbed most of those investments?",
-    "category": "capital_expenditure",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q010",
-    "company": "Amazon",
-    "question": "What operating income range did Amazon guide for the first quarter of 2026?",
-    "category": "guidance",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q011",
-    "company": "Microsoft",
-    "question": "What was Microsoft's total revenue and operating income for fiscal year 2025?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q012",
-    "company": "Microsoft",
-    "question": "What was revenue for each of Microsoft's three reportable segments in fiscal year 2025?",
-    "category": "segment_analysis",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q013",
-    "company": "Microsoft",
-    "question": "Which business lines made up Microsoft Cloud revenue in fiscal year 2025, and what was the reported Microsoft Cloud revenue amount?",
-    "category": "cloud_metrics",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q014",
-    "company": "Microsoft",
-    "question": "What did Microsoft disclose about its additional lease commitments that had not yet commenced as of June 30, 2025?",
-    "category": "commitments_and_leases",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q015",
-    "company": "Microsoft",
-    "question": "What was Microsoft's net deferred income tax asset at June 30, 2025, and what was the largest deferred tax asset component?",
-    "category": "accounting_and_tax",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q016",
+    "id": "14",
     "company": "Netflix",
-    "question": "What were Netflix's total revenues, operating income, and net income for the year ended December 31, 2025?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q017",
-    "company": "Netflix",
-    "question": "Why did Netflix say it discontinued reporting membership numbers, and what primary financial metrics did it choose to focus on instead?",
-    "category": "business_model",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q018",
-    "company": "Netflix",
-    "question": "What foreign currency exposure did Netflix disclose for 2025, and how much higher would revenues have been on a constant currency basis?",
-    "category": "foreign_exchange_risk",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q019",
-    "company": "Netflix",
-    "question": "How much debt did Netflix have as of December 31, 2025, and over what maturity range did the twelve debt tranches run?",
-    "category": "debt_and_liquidity",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q020",
-    "company": "Netflix",
-    "question": "Besides monthly membership fees, what other revenue sources did Netflix mention, and were they material in 2025?",
-    "category": "revenue_sources",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q021",
-    "company": "NVIDIA",
-    "question": "What was NVIDIA's net income for fiscal year 2026?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q022",
-    "company": "NVIDIA",
-    "question": "How does NVIDIA describe CUDA, and why is it important to its platform strategy?",
-    "category": "technology_platform",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q023",
-    "company": "NVIDIA",
-    "question": "Which end markets does NVIDIA say its accelerated computing platforms serve?",
-    "category": "market_segments",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q024",
-    "company": "NVIDIA",
-    "question": "What did NVIDIA say about the Blackwell architecture, and how does it differ from the Hopper generation in terms of scale and performance goals?",
-    "category": "architecture_and_infrastructure",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q025",
-    "company": "NVIDIA",
-    "question": "What portion of NVIDIA's engineering workforce does the company say works on software?",
-    "category": "human_capital",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q026",
-    "company": "Amazon",
-    "question": "How many robots were operating in Amazon fulfillment centers, according to the report?",
-    "category": "operations_and_logistics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q027",
-    "company": "Amazon",
-    "question": "How much has Amazon committed to expand its rural delivery network, and what customer problem is that investment meant to address?",
-    "category": "geographic_expansion",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q028",
-    "company": "Amazon",
-    "question": "What is Amazon Leo, when is it scheduled to launch, and what two customer advantages does Amazon say it will provide over alternatives?",
-    "category": "satellite_and_connectivity",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q029",
-    "company": "Amazon",
-    "question": "How many Same Day Fulfillment Centers had Amazon built, and what role do they play in its delivery strategy?",
-    "category": "fulfillment_network",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q030",
-    "company": "Amazon",
-    "question": "What grocery-related business models or formats did Amazon say it had pursued, and what did it learn from those experiments?",
-    "category": "grocery_strategy",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q031",
-    "company": "Microsoft",
-    "question": "What are Microsoft's three reportable operating segments?",
-    "category": "operating_segments",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q032",
-    "company": "Microsoft",
-    "question": "What are Microsoft's stated sustainability goals, and by what year does it aim to reach them?",
-    "category": "sustainability",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q033",
-    "company": "Microsoft",
-    "question": "What does Microsoft say primarily drives Azure revenue?",
-    "category": "cloud_revenue_model",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q034",
-    "company": "Microsoft",
-    "question": "Which business lines are included in Microsoft's Intelligent Cloud segment?",
-    "category": "cloud_business",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q035",
-    "company": "Microsoft",
-    "question": "How does Microsoft define Microsoft 365 Commercial, and what growth drivers does it identify for that business?",
-    "category": "ai_product_strategy",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q036",
-    "company": "Netflix",
-    "question": "What core strategy does Netflix say it uses to grow its business globally?",
-    "category": "business_strategy",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q037",
-    "company": "Netflix",
-    "question": "How many full-time employees did Netflix have as of December 31, 2025, and how were they distributed by region?",
-    "category": "human_capital",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q038",
-    "company": "Netflix",
-    "question": "Which companies and services does Netflix identify as its main competitive set in entertainment video?",
-    "category": "competition",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q039",
-    "company": "Netflix",
-    "question": "What kinds of regulatory changes does Netflix say could affect its business in different countries?",
-    "category": "regulation",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q040",
-    "company": "Netflix",
-    "question": "What categories of intellectual property does Netflix say are important to its success?",
-    "category": "intellectual_property",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q041",
-    "company": "NVIDIA",
-    "question": "What were NVIDIA's total research and development expenses in fiscal year 2026?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q042",
-    "company": "NVIDIA",
-    "question": "What did NVIDIA identify as the main end-market drivers behind demand for its data center products?",
-    "category": "market_demand",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q043",
-    "company": "NVIDIA",
-    "question": "How does NVIDIA describe the role of its software stack in differentiating its platform from competitors?",
-    "category": "technology_platform",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q044",
-    "company": "NVIDIA",
-    "question": "What risks did NVIDIA disclose related to supply chain, manufacturing, or capacity constraints?",
+    "question": "According to netflix_10k.pdf, what are the specific multiemployer pension plan risks identified by Netflix regarding withdrawal or underfunded statuses?",
     "category": "risk_factors",
-    "difficulty": "medium"
+    "difficulty": "hard",
+    "reference_answer": "(i) contributions made by the Company to the multiemployer pension plans may be used to provide benefits to employees of other participating employers; (ii) if the Company chooses to stop participating in the multiemployer pension plans, it may be required to pay those plans an amount based on the underfunded status of the plan; and (iii) if a company stops contributing to the multiemployer pension plan, the unfunded obligations of the plan may become the obligation of the remaining participating employers."
   },
   {
-    "id": "Q045",
+    "id": "15",
     "company": "NVIDIA",
-    "question": "What was NVIDIA's cash, cash equivalents, and marketable securities position at the end of fiscal year 2026?",
-    "category": "liquidity",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q046",
-    "company": "Amazon",
-    "question": "What was Amazon's free cash flow in 2025, and how does Amazon define free cash flow?",
-    "category": "cash_flow",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q047",
-    "company": "Amazon",
-    "question": "What was AWS's revenue in 2025, and how did it compare with Amazon's total net sales?",
-    "category": "segment_analysis",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q048",
-    "company": "Amazon",
-    "question": "What role did Prime membership play in Amazon's growth strategy, according to the report?",
-    "category": "business_strategy",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q049",
-    "company": "Amazon",
-    "question": "What did Amazon say about the growth and economics of its advertising business?",
-    "category": "revenue_streams",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q050",
-    "company": "Amazon",
-    "question": "What were the major drivers of Amazon's operating expenses in 2025, and which cost areas were highlighted as important?",
-    "category": "cost_structure",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q051",
-    "company": "Microsoft",
-    "question": "How much did Microsoft return to shareholders through dividends and share repurchases in fiscal year 2025?",
-    "category": "capital_allocation",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q052",
-    "company": "Microsoft",
-    "question": "What were the main growth drivers for Microsoft's Intelligent Cloud segment in fiscal year 2025?",
-    "category": "segment_drivers",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q053",
-    "company": "Microsoft",
-    "question": "What does Microsoft say about the relationship between Azure and AI workloads?",
-    "category": "ai_and_cloud",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q054",
-    "company": "Microsoft",
-    "question": "What did Microsoft disclose about cybersecurity as a business risk and an operational priority?",
-    "category": "cybersecurity",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q055",
-    "company": "Microsoft",
-    "question": "What was Microsoft's total cash flow from operations in fiscal year 2025?",
-    "category": "cash_flow",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q056",
-    "company": "Netflix",
-    "question": "What were Netflix's total content liabilities and why are they important to the business model?",
-    "category": "content_commitments",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q057",
-    "company": "Netflix",
-    "question": "How did Netflix describe the impact of its ad-supported plan on its membership and monetization strategy?",
-    "category": "business_model",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q058",
-    "company": "Netflix",
-    "question": "What were Netflix's revenues by geographic region, and which region contributed the most?",
-    "category": "geographic_analysis",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q059",
-    "company": "Netflix",
-    "question": "What were the main factors affecting Netflix's content amortization expense in 2025?",
-    "category": "content_amortization",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q060",
-    "company": "Netflix",
-    "question": "What did Netflix say about its ability to fund operations and content investments through operating cash flow and debt?",
-    "category": "liquidity",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q061",
-    "company": "NVIDIA",
-    "question": "What was NVIDIA's revenue from Data Center in fiscal year 2026?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q062",
-    "company": "NVIDIA",
-    "question": "What does NVIDIA say about the importance of AI model training and inference to its business?",
-    "category": "ai_workloads",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q063",
-    "company": "NVIDIA",
-    "question": "How does NVIDIA explain the relationship between its platform strategy and the software ecosystem built around CUDA and related libraries?",
-    "category": "technology_platform",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q064",
-    "company": "NVIDIA",
-    "question": "What risks did NVIDIA identify related to export controls or geopolitical restrictions?",
+    "question": "According to nvidia_10k.pdf, what preliminary finding did China's antitrust regulators publish on September 15, 2025, regarding NVIDIA's compliance with U.S. export controls and its Mellanox acquisition?",
     "category": "risk_factors",
-    "difficulty": "hard"
+    "difficulty": "hard",
+    "reference_answer": "On September 15, 2025, China's antitrust regulators published their preliminary finding that our compliance with applicable U.S. export controls, which required us to offer degraded products to the Chinese market, discriminated unfairly against customers in the China market and therefore violated the terms of China's approval of our Mellanox acquisition."
   },
   {
-    "id": "Q065",
-    "company": "NVIDIA",
-    "question": "What are NVIDIA's main reportable customer types or go-to-market channels described in the annual report?",
-    "category": "business_model",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q066",
-    "company": "Amazon",
-    "question": "What was Amazon's net cash provided by operating activities in 2025?",
-    "category": "cash_flow",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q067",
-    "company": "Amazon",
-    "question": "What did Amazon say about the performance of AWS in 2025, and what factors supported its growth?",
-    "category": "segment_analysis",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q068",
-    "company": "Amazon",
-    "question": "How does Amazon describe the role of AI in its future customer experience and business investments?",
-    "category": "ai_strategy",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q069",
-    "company": "Amazon",
-    "question": "What does Amazon disclose about its long-term debt and lease obligations?",
-    "category": "liquidity_and_obligations",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q070",
-    "company": "Amazon",
-    "question": "What was the size and purpose of Amazon's investments in fulfillment and transportation infrastructure in 2025?",
-    "category": "capital_expenditure",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q071",
-    "company": "Microsoft",
-    "question": "What was Microsoft's cash, cash equivalents, and short-term investments balance at June 30, 2025?",
-    "category": "liquidity",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q072",
-    "company": "Microsoft",
-    "question": "How does Microsoft describe the relationship between AI and productivity across its business segments?",
-    "category": "ai_strategy",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q073",
-    "company": "Microsoft",
-    "question": "What are the main components of Microsoft's Productivity and Business Processes segment?",
-    "category": "operating_segments",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q074",
-    "company": "Microsoft",
-    "question": "What does Microsoft say about the revenue drivers for Dynamics 365 and Power Platform?",
-    "category": "segment_drivers",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q075",
-    "company": "Microsoft",
-    "question": "What risks did Microsoft identify around competition in cloud, productivity, and personal computing?",
-    "category": "competition",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q076",
+    "id": "16",
     "company": "Netflix",
-    "question": "What was Netflix's operating margin in 2025, and how did it relate to the company's stated target?",
-    "category": "financial_metrics",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q077",
-    "company": "Netflix",
-    "question": "What did Netflix say about the importance of content and pricing changes to member growth?",
-    "category": "business_strategy",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q078",
-    "company": "Netflix",
-    "question": "What are the main risks Netflix faces from competition and consumer substitution in the entertainment market?",
+    "question": "What was the cumulative loss recognized by Netflix as an operating expense in the third quarter of 2025 regarding its non-income tax assessments with the Brazilian tax authorities?",
     "category": "risk_factors",
-    "difficulty": "hard"
+    "difficulty": "hard",
+    "reference_answer": "The cumulative loss recognized as an operating expense in the third quarter of the current year related to non-income tax assessments with the Brazilian tax authorities was approximately $619 million."
   },
   {
-    "id": "Q079",
-    "company": "Netflix",
-    "question": "How does Netflix account for content costs, and what are the key factors that affect content amortization?",
-    "category": "content_accounting",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q080",
-    "company": "Netflix",
-    "question": "What did Netflix disclose about its advertising business and the role of the ad-supported plan?",
-    "category": "revenue_model",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q081",
+    "id": "17",
     "company": "NVIDIA",
-    "question": "What was NVIDIA's total revenue in fiscal year 2026, and how much did it change from the prior year?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
+    "question": "According to nvidia_10k.pdf, what specific core functions is the NVIDIA Rubin platform architecture built to address, and what scale of token cost reduction does it offer over Blackwell?",
+    "category": "strategic_development",
+    "difficulty": "hard",
+    "reference_answer": "Built for agentic AI and reasoning, it excels at processing multi-step problem-solving and massive long-context workflows, delivering up to a 10x reduction in cost per token compared to Blackwell."
   },
   {
-    "id": "Q082",
+    "id": "18",
+    "company": "Amazon",
+    "question": "How much new power capacity did AWS add in 2025, and what is its expectation for total power capacity?",
+    "category": "strategic_development",
+    "difficulty": "hard",
+    "reference_answer": "AWS added 3.9 gigawatts (\"GW\") of new power capacity in 2025, expects to double total power capacity by the end of 2027."
+  },
+  {
+    "id": "19",
+    "company": "Netflix",
+    "question": "What specific debt facilities and commitment arrangements did Netflix secure in December 2025 to fund the proposed acquisition of WBD's streaming and studios businesses?",
+    "category": "strategic_development",
+    "difficulty": "hard",
+    "reference_answer": "Netflix entered into a bridge commitment letter for up to a $59 billion senior unsecured bridge term loan facility on December 4, 2025. On December 19, 2025, Netflix replaced a portion of those commitments by entering into a $5 billion senior unsecured revolving credit facility and a senior unsecured delayed draw credit facility providing for a two-year $10 billion unsecured delayed draw term loan facility and a three-year $10 billion unsecured delayed draw term loan facility."
+  },
+  {
+    "id": "20",
     "company": "NVIDIA",
-    "question": "What are the main components of NVIDIA's data center platform strategy, according to the annual report?",
-    "category": "technology_platform",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q083",
-    "company": "NVIDIA",
-    "question": "How does NVIDIA explain the relationship between its software libraries, CUDA ecosystem, and customer lock-in or switching costs?",
-    "category": "business_model",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q084",
-    "company": "NVIDIA",
-    "question": "What risks does NVIDIA disclose about dependence on a small number of customers and suppliers?",
-    "category": "risk_factors",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q085",
-    "company": "NVIDIA",
-    "question": "What did NVIDIA say about the scale and purpose of its research and development investment over time?",
-    "category": "research_and_development",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q086",
-    "company": "Amazon",
-    "question": "What was Amazon's total net sales in 2025, and which segment contributed the most revenue?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q087",
-    "company": "Amazon",
-    "question": "How did Amazon describe the role of AWS, advertising, and Prime in its long-term growth strategy?",
-    "category": "business_strategy",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q088",
-    "company": "Amazon",
-    "question": "What did Amazon disclose about its purchase obligations, lease commitments, and other long-term contractual commitments?",
-    "category": "commitments_and_contingencies",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q089",
-    "company": "Amazon",
-    "question": "How does Amazon explain the economics of its advertising business, and what makes it strategically important?",
-    "category": "revenue_streams",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q090",
-    "company": "Amazon",
-    "question": "What were the main reasons Amazon gave for its capital expenditures in 2025, and which areas received the most investment?",
-    "category": "capital_expenditure",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q091",
-    "company": "Microsoft",
-    "question": "What was Microsoft's total revenue in fiscal year 2025?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q092",
-    "company": "Microsoft",
-    "question": "What are the main components of Microsoft's More Personal Computing segment?",
-    "category": "operating_segments",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q093",
-    "company": "Microsoft",
-    "question": "How does Microsoft describe the growth drivers and AI opportunities within Azure and the broader Intelligent Cloud segment?",
-    "category": "ai_and_cloud",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q094",
-    "company": "Microsoft",
-    "question": "What did Microsoft say about the impact of competition on its cloud, productivity, and personal computing businesses?",
-    "category": "competition",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q095",
-    "company": "Microsoft",
-    "question": "What were Microsoft's stated long-term sustainability goals, and what target year applies to them?",
-    "category": "sustainability",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q096",
-    "company": "Netflix",
-    "question": "What was Netflix's revenue in 2025, and what was its operating margin?",
-    "category": "financial_metrics",
-    "difficulty": "easy"
-  },
-  {
-    "id": "Q097",
-    "company": "Netflix",
-    "question": "How does Netflix explain the role of its ad-supported plan within its pricing and growth strategy?",
-    "category": "revenue_model",
-    "difficulty": "medium"
-  },
-  {
-    "id": "Q098",
-    "company": "Netflix",
-    "question": "What are the major risk factors Netflix identifies around content costs, member retention, and competition for leisure time?",
-    "category": "risk_factors",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q099",
-    "company": "Netflix",
-    "question": "What did Netflix disclose about its content assets, content liabilities, and why those numbers matter to the business?",
-    "category": "content_commitments",
-    "difficulty": "hard"
-  },
-  {
-    "id": "Q100",
-    "company": "Netflix",
-    "question": "How does Netflix describe the purpose of its global content investment strategy, and what kinds of content or formats does it prioritize?",
-    "category": "content_strategy",
-    "difficulty": "medium"
+    "question": "What were the strategic intent and monetary volume of NVIDIA's investments in private companies and infrastructure funds during fiscal year 2026?",
+    "category": "strategic_development",
+    "difficulty": "hard",
+    "reference_answer": "NVIDIA invested $17.5 billion in private companies and infrastructure funds, primarily to support early-stage startups. These investments include AI model makers that purchase our products directly or through CSPs."
   }
 ]
 }

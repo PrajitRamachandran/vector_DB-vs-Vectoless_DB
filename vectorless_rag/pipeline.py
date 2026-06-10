@@ -1,39 +1,14 @@
 # vectorless_rag/pipeline.py
-#
-# Bug fixes applied:
-#
-# 1. RELATIVE PATH CRASH
-#    Old: Path("../data/processed/chunks.json")
-#    This path is resolved relative to the PROCESS working directory (CWD),
-#    which is the notebook directory when run from Jupyter. That means the
-#    path resolves to notebooks/../data/..., which works only sometimes and
-#    breaks completely when the pipeline is imported from anywhere else.
-#    Fix: resolve from __file__ so the path is always absolute and correct
-#    regardless of where the code is called from.
-#
-# 2. INCONSISTENT METHOD LABEL
-#    Old: "method": "bm25"
-#    The evaluator registers this pipeline under the label "vectorless".
-#    Returning "bm25" from ask() creates a mismatch in the results CSV and
-#    in any downstream code that branches on method name.
-#    Fix: return "method": "vectorless" consistently.
-#
-# 3. MISSING EMPTY-CONTEXT GUARD
-#    If retrieval returns nothing, the old code still called generate_answer()
-#    with an empty context, which either errors or returns a hallucinated answer.
-#    Fix: return the standard "not found" message early when context is empty.
 
 import sys
 import time
 import json
 from pathlib import Path
-
 sys.path.append(str(Path(__file__).parent.parent))
-
-from vectorless_rag.indexer   import load_bm25_index
-from vector_rag.indexer       import build_parent_lookup
+from vectorless_rag.indexer import load_bm25_index
+from vector_rag.indexer import build_parent_lookup
 from vectorless_rag.retriever import retrieve
-from llm                      import load_llm, generate_answer, format_context
+from llm import load_llm, generate_answer, format_context
 
 
 class VectorlessRAGPipeline:
@@ -66,6 +41,8 @@ class VectorlessRAGPipeline:
         top_k = top_k or TOP_K
 
         ret     = retrieve(question, self.bm25, self.children, self.parent_lookup, top_k)
+        retrieval_time = round(ret.get("retrieval_latency", ret.get("latency", 0.0)), 4)
+        rerank_time = round(ret.get("rerank_latency", 0.0), 4)
         context = format_context(ret["chunks"])
 
         # Guard: don't call the LLM with empty context (fix #3)
@@ -74,10 +51,13 @@ class VectorlessRAGPipeline:
                 "question"       : question,
                 "answer"         : "This information was not found in the retrieved sections.",
                 "retrieved"      : ret["chunks"],
-                "retrieval_time" : ret["latency"],
+                "retrieval_time" : retrieval_time,
+                "rerank_time"    : rerank_time,
                 "generation_time": 0.0,
-                "total_time"     : ret["latency"],
+                "total_time"     : round(retrieval_time + rerank_time, 4),
                 "method"         : "vectorless",   # consistent label (fix #2)
+                "retrieval_latency": retrieval_time,
+                "rerank_latency"   : rerank_time,
             }
 
         gen_start = time.perf_counter()
@@ -88,10 +68,13 @@ class VectorlessRAGPipeline:
             "question"       : question,
             "answer"         : answer,
             "retrieved"      : ret["chunks"],
-            "retrieval_time" : ret["latency"],
+            "retrieval_time" : retrieval_time,
+            "rerank_time"    : rerank_time,
             "generation_time": gen_time,
-            "total_time"     : round(ret["latency"] + gen_time, 4),
+            "total_time"     : round(retrieval_time + rerank_time + gen_time, 4),
             "method"         : "vectorless",   # consistent label (fix #2)
+            "retrieval_latency": retrieval_time,
+            "rerank_latency"   : rerank_time,
         }
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -113,8 +96,9 @@ class VectorlessRAGPipeline:
             )
         print(f"{'─'*55}")
         print(
-            f"  Retrieval: {result['retrieval_time']}s | "
-            f"Generation: {result['generation_time']}s | "
-            f"Total: {result['total_time']}s"
+            f"  Retrieval: {result['retrieval_time']:.4f}s | "
+            f"Rerank: {result.get('rerank_time', 0):.4f}s | "
+            f"Generation: {result['generation_time']:.4f}s | "
+            f"Total: {result['total_time']:.4f}s"
         )
         print(f"{'='*55}\n")

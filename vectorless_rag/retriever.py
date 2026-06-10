@@ -38,7 +38,12 @@ def retrieve(query: str, bm25, children: list[dict],
     tokenized_corpus = [tokenize(c["text"]) for c in search_children]
     filtered_bm25    = BM25Okapi(tokenized_corpus)
 
-    tokenized_query  = tokenize(query_info["clean_query"])
+    tokenized_query  = tokenize(
+        query_info["clean_query"]
+        or query_info["semantic_query"]
+        or query_info["original"]
+        or ""
+    )
     scores           = filtered_bm25.get_scores(tokenized_query)
     top_indices      = np.argsort(scores)[::-1][: config.FETCH_K]
 
@@ -59,25 +64,42 @@ def retrieve(query: str, bm25, children: list[dict],
 
     # Rerank
     rerank_start   = time.perf_counter()
-    child_results  = rerank(query, child_results, top_k=top_k)
+    child_results  = rerank(query, child_results, top_k=config.FETCH_K)
     rerank_latency = time.perf_counter() - rerank_start
 
     # Swap children → parents
     seen_parents = set()
     final_chunks = []
     for child in child_results:
+        if len(final_chunks) >= top_k:
+            break
         parent_id = child["metadata"].get("parent_id")
-        if parent_id and parent_id not in seen_parents:
-            parent = parent_lookup.get(parent_id)
-            if parent:
+        if parent_id and parent_id in seen_parents:
+            continue
+
+        parent = parent_lookup.get(parent_id) if parent_id else None
+        if parent:
+            seen_parents.add(parent_id)
+            final_chunks.append({
+                "text"        : parent["text"],
+                "metadata"    : child["metadata"],
+                "score"       : child.get("rerank_score", child["score"]),
+                "rerank_score": child.get("rerank_score", child["score"]),
+                "child_text"  : child["text"]
+            })
+        else:
+            text = (child.get("text") or "").strip()
+            if not text:
+                continue
+            if parent_id:
                 seen_parents.add(parent_id)
-                final_chunks.append({
-                    "text"        : parent["text"],
-                    "metadata"    : child["metadata"],
-                    "score"       : child.get("rerank_score", child["score"]),
-                    "rerank_score": child.get("rerank_score", child["score"]),
-                    "child_text"  : child["text"]
-                })
+            final_chunks.append({
+                "text"        : text,
+                "metadata"    : child["metadata"],
+                "score"       : child.get("rerank_score", child["score"]),
+                "rerank_score": child.get("rerank_score", child["score"]),
+                "child_text"  : text
+            })
 
     return {
         "chunks"           : final_chunks,

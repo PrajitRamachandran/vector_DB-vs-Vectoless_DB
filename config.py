@@ -27,7 +27,7 @@ MISTRAL_JUDGE_RPM = 12
 # ── Embedding — upgraded to BGE base ────────────────────────────
 # BGE models are trained specifically for retrieval tasks
 # base (768 dims) vs MiniLM (384 dims) — 2x richer representation
-EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"
 HF_TOKEN = os.getenv("HF_TOKEN")
 #________________________________________________________________
 

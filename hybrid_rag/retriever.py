@@ -125,6 +125,7 @@ def _vector_fetch(
     query:   str,
     collection,
     company: str | None,
+    top_k:   int = config.TOP_K,
 ) -> list[dict]:
     """
     Runs a vector similarity search and returns up to FETCH_K child chunks
@@ -169,7 +170,7 @@ def _vector_fetch(
 
     # Fallback: if the WHERE filter + post-filter left us with too few chunks,
     # query without WHERE and filter manually from metadata (fix #2 continued)
-    if company and len(children) < 3:
+    if company and len(children) < max(3, top_k):
         kwargs_no_filter = {k: v for k, v in kwargs.items() if k != "where"}
         results2 = collection.query(**kwargs_no_filter)
         children = _to_chunks(
@@ -208,7 +209,12 @@ def _bm25_fetch(
     tokenized_corpus = [tokenize(c["text"]) for c in search_children]
     filtered_bm25    = BM25Okapi(tokenized_corpus)
 
-    tokenized_query  = tokenize(query_info["clean_query"])
+    tokenized_query  = tokenize(
+        query_info["clean_query"]
+        or query_info["semantic_query"]
+        or query_info["original"]
+        or ""
+    )
     scores           = filtered_bm25.get_scores(tokenized_query)
     top_indices      = np.argsort(scores)[::-1][: config.FETCH_K]
 
@@ -250,11 +256,12 @@ def retrieve(
     start_time = time.perf_counter()
     query_info = preprocess_query(query)
     company    = query_info["company"]
-    clean_query = query_info["clean_query"] or query_info["original"] or query
+    semantic_query = query_info["semantic_query"] or query_info["original"] or query
+    clean_query = query_info["clean_query"] or semantic_query
 
     # ── First-stage: both retrievers ─────────────────────────────────────────
     vector_start    = time.perf_counter()
-    vector_children = _vector_fetch(clean_query, collection, company)
+    vector_children = _vector_fetch(semantic_query, collection, company, top_k=top_k)
     vector_latency  = time.perf_counter() - vector_start
 
     bm25_start      = time.perf_counter()
@@ -267,27 +274,46 @@ def retrieve(
 
     # ── Rerank fused list once ────────────────────────────────────────────────
     rerank_start   = time.perf_counter()
-    reranked       = rerank(query, fused_children, top_k=top_k)
+    reranked       = rerank(query, fused_children, top_k=config.FETCH_K)
     rerank_latency = time.perf_counter() - rerank_start
 
     # ── Swap children → parents (deduplicated) ────────────────────────────────
     seen_parents = set()
     final_chunks = []
     for child in reranked:
+        if len(final_chunks) >= top_k:
+            break
         parent_id = child["metadata"].get("parent_id")
-        if parent_id and parent_id not in seen_parents:
-            parent = parent_lookup.get(parent_id)
-            if parent:
+        if parent_id and parent_id in seen_parents:
+            continue
+
+        parent = parent_lookup.get(parent_id) if parent_id else None
+        if parent:
+            seen_parents.add(parent_id)
+            final_chunks.append({
+                "text"        : parent["text"],
+                "metadata"    : child["metadata"],
+                "score"       : child.get("rerank_score", child["score"]),
+                "rerank_score": child.get("rerank_score", child["score"]),
+                "rrf_score"   : child.get("rrf_score", 0.0),
+                "rrf_sources" : child.get("rrf_sources", []),
+                "child_text"  : child["text"],    # kept for debugging
+            })
+        else:
+            text = (child.get("text") or "").strip()
+            if not text:
+                continue
+            if parent_id:
                 seen_parents.add(parent_id)
-                final_chunks.append({
-                    "text"        : parent["text"],
-                    "metadata"    : child["metadata"],
-                    "score"       : child.get("rerank_score", child["score"]),
-                    "rerank_score": child.get("rerank_score", child["score"]),
-                    "rrf_score"   : child.get("rrf_score", 0.0),
-                    "rrf_sources" : child.get("rrf_sources", []),
-                    "child_text"  : child["text"],    # kept for debugging
-                })
+            final_chunks.append({
+                "text"        : text,
+                "metadata"    : child["metadata"],
+                "score"       : child.get("rerank_score", child["score"]),
+                "rerank_score": child.get("rerank_score", child["score"]),
+                "rrf_score"   : child.get("rrf_score", 0.0),
+                "rrf_sources" : child.get("rrf_sources", []),
+                "child_text"  : text,
+            })
 
     return {
         "chunks"           : final_chunks,

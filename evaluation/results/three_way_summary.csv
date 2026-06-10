@@ -1,4 +1,4 @@
 method,method_label,questions,avg_judge_score,pass_rate_pct,company_accuracy_pct,avg_retrieval_time_s,avg_generation_time_s,avg_total_time_s
-vector,Vector RAG,100,4.4,100.0,25.0,0.31967,1.7268020000000002,2.046472
-vectorless,Vectorless RAG,100,4.47,98.0,25.0,0.263946,1.5798929999999998,1.843839
-hybrid,Hybrid RAG,100,4.3,100.0,25.0,0.353033,1.835484,2.188517
+vector,Vector RAG,20,4.5,95,100,0.66788,1.3444,2.884405
+vectorless,Vectorless RAG,20,4.7,100,100,0.05283,1.346155,1.66222
+hybrid,Hybrid RAG,20,4.6,100,100,0.63464,1.41385,2.33697

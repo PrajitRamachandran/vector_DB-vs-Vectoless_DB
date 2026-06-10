@@ -70,18 +70,14 @@ def _build_child_chunks(results: dict) -> list[dict]:
     return child_chunks
 
 
-def _company_hit_rate(chunks: list[dict], company: str) -> float:
-    """
-    Returns the fraction of chunks whose metadata company matches the target.
-    Used to detect stale-index / wrong-company silent failures.
-    """
-    if not chunks or not company:
-        return 1.0
-    correct = sum(
-        1 for c in chunks
-        if c.get("metadata", {}).get("company", "") == company
-    )
-    return correct / len(chunks)
+def _filter_company_chunks(chunks: list[dict], company: str | None) -> list[dict]:
+    """Keeps only chunks whose metadata company matches the target company."""
+    if not company:
+        return chunks
+    return [
+        chunk for chunk in chunks
+        if chunk.get("metadata", {}).get("company", "") == company
+    ]
 
 
 def retrieve(
@@ -106,9 +102,9 @@ def retrieve(
 
     query_info   = preprocess_query(query)
     company      = query_info["company"]
-    # Use the cleaned retrieval query: company/year are handled separately and
-    # removing them tends to improve dense retrieval focus for financial QA.
-    raw_query    = query_info["clean_query"] or query_info["original"] or query
+    # Use the semantic query so dense retrieval keeps the company name and
+    # avoids possessive artifacts like "'s".
+    raw_query    = query_info["semantic_query"] or query_info["original"] or query
 
     # Build the BGE-prefixed query string (fix #1)
     bge_q = _bge_query(raw_query)
@@ -116,24 +112,15 @@ def retrieve(
     # ── First attempt: with company filter ────────────────────────────────────
     where_filter  = {"company": company} if company else None
     results       = _run_query(collection, bge_q, where_filter)
-    child_chunks  = _build_child_chunks(results)
+    child_chunks  = _filter_company_chunks(_build_child_chunks(results), company)
 
     # ── Fallback decision (fix #2 + #3) ──────────────────────────────────────
     # Trigger fallback when the filter returned too few results OR the chunks
     # that came back are mostly from the wrong company (stale index signal).
-    if where_filter is not None:
-        too_few      = len(child_chunks) < 3
-        wrong_company = _company_hit_rate(child_chunks, company) < 0.5
-        if too_few or wrong_company:
-            # Retry without filter and manually keep correct-company chunks
-            results   = _run_query(collection, bge_q, None)
-            all_chunks = _build_child_chunks(results)
-            company_chunks = [
-                c for c in all_chunks
-                if c.get("metadata", {}).get("company", "") == company
-            ]
-            # Prefer company-specific; fall through to all if still nothing
-            child_chunks = company_chunks if company_chunks else all_chunks
+    if where_filter is not None and len(child_chunks) < max(3, top_k):
+        results        = _run_query(collection, bge_q, None)
+        all_chunks     = _build_child_chunks(results)
+        child_chunks   = _filter_company_chunks(all_chunks, company)
 
     retrieval_latency = time.perf_counter() - start_time
 
@@ -151,13 +138,15 @@ def retrieve(
 
     # ── Rerank children ───────────────────────────────────────────────────────
     rerank_start   = time.perf_counter()
-    child_chunks   = rerank(query, child_chunks, top_k=top_k)
+    child_chunks   = rerank(query, child_chunks, top_k=config.FETCH_K)
     rerank_latency = time.perf_counter() - rerank_start
 
     # ── Swap children → parents (deduplicated) ────────────────────────────────
     seen_parents = set()
     final_chunks = []
     for child in child_chunks:
+        if len(final_chunks) >= top_k:
+            break
         meta      = child.get("metadata") or {}
         parent_id = meta.get("parent_id")
         if not parent_id or parent_id in seen_parents:
@@ -171,6 +160,19 @@ def retrieve(
                 "score"       : child.get("rerank_score", child.get("score", 0.0)),
                 "rerank_score": child.get("rerank_score", child.get("score", 0.0)),
                 "child_text"  : child.get("text", ""),
+            })
+        else:
+            text = (child.get("text") or "").strip()
+            if not text:
+                continue
+            if parent_id:
+                seen_parents.add(parent_id)
+            final_chunks.append({
+                "text"        : text,
+                "metadata"    : meta,
+                "score"       : child.get("rerank_score", child.get("score", 0.0)),
+                "rerank_score": child.get("rerank_score", child.get("score", 0.0)),
+                "child_text"  : text,
             })
 
     # ── Safety net: parent lookup failed — keep child text ────────────────────
