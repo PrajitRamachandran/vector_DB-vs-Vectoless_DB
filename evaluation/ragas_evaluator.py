@@ -313,200 +313,342 @@ def build_ragas_dataset(
     return dataset, row_metadata
 
 
+# def run_ragas_evaluation(
+#     judge_df: pd.DataFrame,
+#     retrieved_contexts_map: dict[str, list[str]],
+#     questions_path: Path = QUESTIONS_PATH,
+#     results_filename: str = "three_way_ragas_results.csv",
+#     batch_size: int = 10,
+# ) -> pd.DataFrame:
+#     """
+#     Runs RAGAS on the same per-question data used for judge scoring.
+
+#     Metrics computed
+#     ----------------
+#     answer_relevancy    – Is the answer on-topic for the question?
+#                           (maps to "Answer Relevancy" in the spec)
+#     faithfulness        – Is every claim in the answer grounded in the
+#                           retrieved context?
+#                           (maps to "Faithfulness")
+#     context_precision   – Are the most relevant chunks ranked highest in the
+#                           retrieved list?
+#                           (maps to "Contextual Precision" AND
+#                            "Contextual Relevancy" – no standalone
+#                            context_relevancy metric exists in RAGAS 0.2.x)
+#     context_recall      – Does the retrieved context contain enough information
+#                           to produce the reference answer?
+#                           (maps to "Contextual Recall"; requires reference_answer
+#                           in test_questions.json – NaN when absent)
+
+#     Parameters
+#     ----------
+#     judge_df:
+#         DataFrame returned by ``run_evaluation()``.
+#     retrieved_contexts_map:
+#         ``{(question_id, method): [context_str, ...]}`` built during the loop.
+#     questions_path:
+#         Path to test_questions.json.
+#     results_filename:
+#         CSV filename saved under evaluation/results/.
+#     batch_size:
+#         How many samples to send to RAGAS per batch.  Lower values are safer
+#         under strict rate limits.
+
+#     Returns
+#     -------
+#     pd.DataFrame with columns:
+#         id, method, question, company, category,
+#         answer_relevancy, faithfulness,
+#         context_precision, context_recall,
+#         contextual_relevancy (alias of context_precision)
+#     """
+#     _check_ragas()
+
+#     ragas_llm  = _build_ragas_llm()
+#     ragas_embs = _build_ragas_embeddings()
+#     ref_map    = _load_reference_map(questions_path)
+#     has_refs  = bool(ref_map)
+
+#     n_unique_questions = len(judge_df["id"].unique()) if "id" in judge_df.columns else "?"
+
+#     print(f"\n{'=' * 55}")
+#     print("   RAGAS EVALUATION")
+#     print(f"   Rows          : {len(judge_df)}")
+#     print(f"   Batch size    : {batch_size}")
+#     print(f"   Judge LLM     : {config.JUDGE_MODEL_ID}")
+#     print(f"   Embeddings    : mistral-embed  (Mistral /v1/embeddings)")
+#     print(f"   Always on      : answer_relevancy, faithfulness")
+#     if has_refs:
+#         print(f"   With refs      : context_precision, context_recall")
+#         print(f"   Refs loaded    : {len(ref_map)} / {n_unique_questions} questions")
+#     else:
+#         print(f"   With refs      : context_precision, context_recall  →  SKIPPED (NaN)")
+#         print(f"   ⚠  No reference_answer fields found in test_questions.json.")
+#         print(f"      Run first:  python evaluation/generate_references.py")
+#         print(f"      Then re-run this cell to get real context metric scores.")
+#     print(f"{'=' * 55}\n")
+
+#     # Decide which metrics to run
+#     # context_precision and context_recall need a reference → only when refs exist
+#     base_metrics = [answer_relevancy, faithfulness]
+#     ref_metrics  = [context_precision, context_recall]
+
+#     records: list[dict] = []
+
+#     # Process in batches to respect rate limits
+#     rows = list(judge_df.iterrows())
+#     n    = len(rows)
+
+#     for batch_start in tqdm(range(0, n, batch_size), desc="RAGAS batches"):
+#         batch_rows = rows[batch_start : batch_start + batch_size]
+#         samples: list[SingleTurnSample] = []
+#         meta: list[dict] = []
+
+#         for _, row in batch_rows:
+#             qid    = str(row.get("id", ""))
+#             method = str(row.get("method", ""))
+#             ctxs   = retrieved_contexts_map.get((qid, method), [])
+#             if not ctxs:
+#                 ctxs = ["No context was captured for this question."]
+
+#             reference = ref_map.get(qid) or None
+
+#             samples.append(
+#                 SingleTurnSample(
+#                     user_input       = str(row.get("question", "")),
+#                     response         = str(row.get("answer", "")),
+#                     retrieved_contexts = ctxs,
+#                     reference        = reference,
+#                 )
+#             )
+#             meta.append(
+#                 {
+#                     "id"         : qid,
+#                     "method"     : method,
+#                     "question"   : str(row.get("question", "")),
+#                     "company"    : str(row.get("company", "")),
+#                     "category"   : str(row.get("category", "")),
+#                     "_has_ref"   : reference is not None,
+#                 }
+#             )
+
+#         dataset = EvaluationDataset(samples=samples)
+
+#         # ── Run base metrics (no reference required) ──────────────────────────
+#         try:
+#             base_result = ragas_evaluate(
+#                 dataset          = dataset,
+#                 metrics          = base_metrics,
+#                 llm              = ragas_llm,
+#                 embeddings       = ragas_embs,
+#                 raise_exceptions = False,
+#                 show_progress    = False,
+#             )
+#             base_df = base_result.to_pandas()
+#         except Exception as exc:
+#             print(f"   Warning: base metrics failed for batch {batch_start}: {exc}")
+#             base_df = pd.DataFrame(
+#                 {
+#                     "answer_relevancy": [float("nan")] * len(samples),
+#                     "faithfulness"    : [float("nan")] * len(samples),
+#                 }
+#             )
+
+#         # ── Run reference metrics when refs are available ─────────────────────
+#         ref_indices   = [i for i, m in enumerate(meta) if m["_has_ref"]]
+#         ref_scores_by_idx: dict[int, dict] = {}
+
+#         if ref_indices and has_refs:
+#             ref_samples = [samples[i] for i in ref_indices]
+#             ref_dataset = EvaluationDataset(samples=ref_samples)
+#             try:
+#                 ref_result = ragas_evaluate(
+#                     dataset          = ref_dataset,
+#                     metrics          = ref_metrics,
+#                     llm              = ragas_llm,
+#                     embeddings       = ragas_embs,
+#                     raise_exceptions = False,
+#                     show_progress    = False,
+#                 )
+#                 ref_df = ref_result.to_pandas()
+#                 for local_idx, global_idx in enumerate(ref_indices):
+#                     ref_scores_by_idx[global_idx] = {
+#                         "context_precision": ref_df.iloc[local_idx].get("context_precision", float("nan")),
+#                         "context_recall"   : ref_df.iloc[local_idx].get("context_recall",    float("nan")),
+#                     }
+#             except Exception as exc:
+#                 print(f"   Warning: reference metrics failed for batch {batch_start}: {exc}")
+
+#         # ── Assemble records ──────────────────────────────────────────────────
+#         for i, m in enumerate(meta):
+#             cp = ref_scores_by_idx.get(i, {}).get("context_precision", float("nan"))
+#             cr = ref_scores_by_idx.get(i, {}).get("context_recall",    float("nan"))
+#             records.append(
+#                 {
+#                     "id"                  : m["id"],
+#                     "method"              : m["method"],
+#                     "question"            : m["question"],
+#                     "company"             : m["company"],
+#                     "category"            : m["category"],
+#                     "answer_relevancy"    : float(base_df.iloc[i].get("answer_relevancy", float("nan"))),
+#                     "faithfulness"        : float(base_df.iloc[i].get("faithfulness",     float("nan"))),
+#                     "context_precision"   : float(cp),
+#                     "context_recall"      : float(cr),
+#                     # Contextual Relevancy is context_precision in RAGAS 0.2.x
+#                     # (no standalone context_relevancy metric exists in this version)
+#                     "contextual_relevancy": float(cp),
+#                 }
+#             )
+
+#     df = pd.DataFrame(records)
+#     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+#     out = RESULTS_DIR / results_filename
+#     df.to_csv(out, index=False, encoding="utf-8")
+#     print(f"\nRAGAS results saved → {out}")
+#     return df
+
+# evaluation/ragas_evaluator.py
+
 def run_ragas_evaluation(
     judge_df: pd.DataFrame,
     retrieved_contexts_map: dict[str, list[str]],
     questions_path: Path = QUESTIONS_PATH,
     results_filename: str = "three_way_ragas_results.csv",
-    batch_size: int = 10,
+    batch_size: int = 10,  # Kept in signature for backward compatibility
 ) -> pd.DataFrame:
     """
-    Runs RAGAS on the same per-question data used for judge scoring.
-
-    Metrics computed
-    ----------------
-    answer_relevancy    – Is the answer on-topic for the question?
-                          (maps to "Answer Relevancy" in the spec)
-    faithfulness        – Is every claim in the answer grounded in the
-                          retrieved context?
-                          (maps to "Faithfulness")
-    context_precision   – Are the most relevant chunks ranked highest in the
-                          retrieved list?
-                          (maps to "Contextual Precision" AND
-                           "Contextual Relevancy" – no standalone
-                           context_relevancy metric exists in RAGAS 0.2.x)
-    context_recall      – Does the retrieved context contain enough information
-                          to produce the reference answer?
-                          (maps to "Contextual Recall"; requires reference_answer
-                          in test_questions.json – NaN when absent)
-
-    Parameters
-    ----------
-    judge_df:
-        DataFrame returned by ``run_evaluation()``.
-    retrieved_contexts_map:
-        ``{(question_id, method): [context_str, ...]}`` built during the loop.
-    questions_path:
-        Path to test_questions.json.
-    results_filename:
-        CSV filename saved under evaluation/results/.
-    batch_size:
-        How many samples to send to RAGAS per batch.  Lower values are safer
-        under strict rate limits.
-
-    Returns
-    -------
-    pd.DataFrame with columns:
-        id, method, question, company, category,
-        answer_relevancy, faithfulness,
-        context_precision, context_recall,
-        contextual_relevancy (alias of context_precision)
+    Runs RAGAS fully parallelized across the entire dataset in a single pass,
+    completely bypassing the slow manual batching loop.
     """
     _check_ragas()
 
     ragas_llm  = _build_ragas_llm()
     ragas_embs = _build_ragas_embeddings()
     ref_map    = _load_reference_map(questions_path)
-    has_refs  = bool(ref_map)
+    has_refs   = bool(ref_map)
 
     n_unique_questions = len(judge_df["id"].unique()) if "id" in judge_df.columns else "?"
 
     print(f"\n{'=' * 55}")
-    print("   RAGAS EVALUATION")
-    print(f"   Rows          : {len(judge_df)}")
-    print(f"   Batch size    : {batch_size}")
-    print(f"   Judge LLM     : {config.JUDGE_MODEL_ID}")
-    print(f"   Embeddings    : mistral-embed  (Mistral /v1/embeddings)")
-    print(f"   Always on      : answer_relevancy, faithfulness")
+    print("   🚀 HIGH-SPEED ASYNC RAGAS EVALUATION")
+    print(f"   Total Evaluation Rows : {len(judge_df)}")
+    print(f"   Judge LLM            : {config.JUDGE_MODEL_ID}")
+    print(f"   Embeddings           : mistral-embed  (Mistral /v1/embeddings)")
+    print(f"   Metrics (Base)       : answer_relevancy, faithfulness")
     if has_refs:
-        print(f"   With refs      : context_precision, context_recall")
-        print(f"   Refs loaded    : {len(ref_map)} / {n_unique_questions} questions")
-    else:
-        print(f"   With refs      : context_precision, context_recall  →  SKIPPED (NaN)")
-        print(f"   ⚠  No reference_answer fields found in test_questions.json.")
-        print(f"      Run first:  python evaluation/generate_references.py")
-        print(f"      Then re-run this cell to get real context metric scores.")
+        print(f"   Metrics (With Refs)  : context_precision, context_recall")
     print(f"{'=' * 55}\n")
 
-    # Decide which metrics to run
-    # context_precision and context_recall need a reference → only when refs exist
     base_metrics = [answer_relevancy, faithfulness]
     ref_metrics  = [context_precision, context_recall]
 
+    samples: list[SingleTurnSample] = []
+    meta: list[dict] = []
+
+    # 1. Build the complete dataset layout at once
+    for _, row in judge_df.iterrows():
+        qid    = str(row.get("id", ""))
+        method = str(row.get("method", ""))
+        ctxs   = retrieved_contexts_map.get((qid, method), [])
+        if not ctxs:
+            ctxs = ["No context was captured for this question."]
+
+        reference = ref_map.get(qid) or None
+
+        samples.append(
+            SingleTurnSample(
+                user_input       = str(row.get("question", "")),
+                response         = str(row.get("answer", "")),
+                retrieved_contexts = ctxs,
+                reference        = reference,
+            )
+        )
+        meta.append(
+            {
+                "id"         : qid,
+                "method"     : method,
+                "question"   : str(row.get("question", "")),
+                "company"    : str(row.get("company", "")),
+                "category"   : str(row.get("category", "")),
+                "_has_ref"   : reference is not None,
+            }
+        )
+
+    full_dataset = EvaluationDataset(samples=samples)
     records: list[dict] = []
 
-    # Process in batches to respect rate limits
-    rows = list(judge_df.iterrows())
-    n    = len(rows)
+    # 2. Unified Pass 1: Evaluate base metrics across the ENTIRE dataset at once
+    try:
+        print("🔄 Running asynchronous evaluation for base metrics...")
+        base_result = ragas_evaluate(
+            dataset          = full_dataset,
+            metrics          = base_metrics,
+            llm              = ragas_llm,
+            embeddings       = ragas_embs,
+            raise_exceptions = False,
+            show_progress    = True,  # Shows unified progress tracking
+        )
+        base_df = base_result.to_pandas()
+    except Exception as exc:
+        print(f"❌ Error: Base metrics calculation failed completely: {exc}")
+        base_df = pd.DataFrame(
+            {
+                "answer_relevancy": [float("nan")] * len(samples),
+                "faithfulness"    : [float("nan")] * len(samples),
+            }
+        )
 
-    for batch_start in tqdm(range(0, n, batch_size), desc="RAGAS batches"):
-        batch_rows = rows[batch_start : batch_start + batch_size]
-        samples: list[SingleTurnSample] = []
-        meta: list[dict] = []
+    # 3. Unified Pass 2: Evaluate reference metrics for matching records at once
+    ref_indices = [i for i, m in enumerate(meta) if m["_has_ref"]]
+    ref_scores_by_idx: dict[int, dict] = {}
 
-        for _, row in batch_rows:
-            qid    = str(row.get("id", ""))
-            method = str(row.get("method", ""))
-            ctxs   = retrieved_contexts_map.get((qid, method), [])
-            if not ctxs:
-                ctxs = ["No context was captured for this question."]
-
-            reference = ref_map.get(qid) or None
-
-            samples.append(
-                SingleTurnSample(
-                    user_input       = str(row.get("question", "")),
-                    response         = str(row.get("answer", "")),
-                    retrieved_contexts = ctxs,
-                    reference        = reference,
-                )
-            )
-            meta.append(
-                {
-                    "id"         : qid,
-                    "method"     : method,
-                    "question"   : str(row.get("question", "")),
-                    "company"    : str(row.get("company", "")),
-                    "category"   : str(row.get("category", "")),
-                    "_has_ref"   : reference is not None,
-                }
-            )
-
-        dataset = EvaluationDataset(samples=samples)
-
-        # ── Run base metrics (no reference required) ──────────────────────────
+    if ref_indices and has_refs:
+        print("🔄 Running asynchronous evaluation for reference metrics...")
+        ref_samples = [samples[i] for i in ref_indices]
+        ref_dataset = EvaluationDataset(samples=ref_samples)
         try:
-            base_result = ragas_evaluate(
-                dataset          = dataset,
-                metrics          = base_metrics,
+            ref_result = ragas_evaluate(
+                dataset          = ref_dataset,
+                metrics          = ref_metrics,
                 llm              = ragas_llm,
                 embeddings       = ragas_embs,
                 raise_exceptions = False,
-                show_progress    = False,
+                show_progress    = True,
             )
-            base_df = base_result.to_pandas()
+            ref_df = ref_result.to_pandas()
+            for local_idx, global_idx in enumerate(ref_indices):
+                ref_scores_by_idx[global_idx] = {
+                    "context_precision": ref_df.iloc[local_idx].get("context_precision", float("nan")),
+                    "context_recall"   : ref_df.iloc[local_idx].get("context_recall",    float("nan")),
+                }
         except Exception as exc:
-            print(f"   Warning: base metrics failed for batch {batch_start}: {exc}")
-            base_df = pd.DataFrame(
-                {
-                    "answer_relevancy": [float("nan")] * len(samples),
-                    "faithfulness"    : [float("nan")] * len(samples),
-                }
-            )
+            print(f"❌ Error: Reference metrics calculation failed completely: {exc}")
 
-        # ── Run reference metrics when refs are available ─────────────────────
-        ref_indices   = [i for i, m in enumerate(meta) if m["_has_ref"]]
-        ref_scores_by_idx: dict[int, dict] = {}
-
-        if ref_indices and has_refs:
-            ref_samples = [samples[i] for i in ref_indices]
-            ref_dataset = EvaluationDataset(samples=ref_samples)
-            try:
-                ref_result = ragas_evaluate(
-                    dataset          = ref_dataset,
-                    metrics          = ref_metrics,
-                    llm              = ragas_llm,
-                    embeddings       = ragas_embs,
-                    raise_exceptions = False,
-                    show_progress    = False,
-                )
-                ref_df = ref_result.to_pandas()
-                for local_idx, global_idx in enumerate(ref_indices):
-                    ref_scores_by_idx[global_idx] = {
-                        "context_precision": ref_df.iloc[local_idx].get("context_precision", float("nan")),
-                        "context_recall"   : ref_df.iloc[local_idx].get("context_recall",    float("nan")),
-                    }
-            except Exception as exc:
-                print(f"   Warning: reference metrics failed for batch {batch_start}: {exc}")
-
-        # ── Assemble records ──────────────────────────────────────────────────
-        for i, m in enumerate(meta):
-            cp = ref_scores_by_idx.get(i, {}).get("context_precision", float("nan"))
-            cr = ref_scores_by_idx.get(i, {}).get("context_recall",    float("nan"))
-            records.append(
-                {
-                    "id"                  : m["id"],
-                    "method"              : m["method"],
-                    "question"            : m["question"],
-                    "company"             : m["company"],
-                    "category"            : m["category"],
-                    "answer_relevancy"    : float(base_df.iloc[i].get("answer_relevancy", float("nan"))),
-                    "faithfulness"        : float(base_df.iloc[i].get("faithfulness",     float("nan"))),
-                    "context_precision"   : float(cp),
-                    "context_recall"      : float(cr),
-                    # Contextual Relevancy is context_precision in RAGAS 0.2.x
-                    # (no standalone context_relevancy metric exists in this version)
-                    "contextual_relevancy": float(cp),
-                }
-            )
+    # 4. Compile and align records back into the required data structure format
+    for i, m in enumerate(meta):
+        cp = ref_scores_by_idx.get(i, {}).get("context_precision", float("nan"))
+        cr = ref_scores_by_idx.get(i, {}).get("context_recall",    float("nan"))
+        records.append(
+            {
+                "id"                  : m["id"],
+                "method"              : m["method"],
+                "question"            : m["question"],
+                "company"             : m["company"],
+                "category"            : m["category"],
+                "answer_relevancy"    : float(base_df.iloc[i].get("answer_relevancy", float("nan"))),
+                "faithfulness"        : float(base_df.iloc[i].get("faithfulness",     float("nan"))),
+                "context_precision"   : float(cp),
+                "context_recall"      : float(cr),
+                "contextual_relevancy": float(cp),
+            }
+        )
 
     df = pd.DataFrame(records)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     out = RESULTS_DIR / results_filename
     df.to_csv(out, index=False, encoding="utf-8")
-    print(f"\nRAGAS results saved → {out}")
+    print(f"\n🎉 RAGAS evaluation execution complete! Saved → {out}")
     return df
-
 
 def merge_results(
     judge_df: pd.DataFrame,

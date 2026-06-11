@@ -1,3 +1,5 @@
+#hybrid_rag/pipeline.py
+
 import sys
 import time
 import json
@@ -48,8 +50,6 @@ class HybridRAGPipeline:
             top_k=top_k,
         )
 
-        retrieval_time = round(ret.get("retrieval_latency", ret.get("latency", 0.0)), 4)
-        rerank_time = round(ret.get("rerank_latency", 0.0), 4)
         context = format_context(ret["chunks"])
 
         if not context:
@@ -57,12 +57,10 @@ class HybridRAGPipeline:
                 "question": question,
                 "answer": "This information was not found in the retrieved sections.",
                 "retrieved": ret["chunks"],
-                "retrieval_time": retrieval_time,
-                "rerank_time": rerank_time,
+                "retrieval_time": ret["latency"],
                 "generation_time": 0.0,
-                "total_time": round(retrieval_time + rerank_time, 4),
+                "total_time": ret["latency"],
                 "method": "hybrid",
-                "retrieval_latency": retrieval_time,
                 "vector_latency": ret.get("vector_latency", 0.0),
                 "bm25_latency": ret.get("bm25_latency", 0.0),
                 "rerank_latency": ret.get("rerank_latency", 0.0),
@@ -79,12 +77,10 @@ class HybridRAGPipeline:
             "question": question,
             "answer": answer,
             "retrieved": ret["chunks"],
-            "retrieval_time": retrieval_time,
-            "rerank_time": rerank_time,
+            "retrieval_time": ret["latency"],
             "generation_time": gen_time,
-            "total_time": round(retrieval_time + rerank_time + gen_time, 4),
+            "total_time": round(ret["latency"] + gen_time, 4),
             "method": "hybrid",
-            "retrieval_latency": retrieval_time,
             "vector_latency": ret["vector_latency"],
             "bm25_latency": ret["bm25_latency"],
             "rerank_latency": ret["rerank_latency"],
@@ -125,9 +121,8 @@ class HybridRAGPipeline:
         )
         print(f"{'─'*55}")
         print(
-            f"  Retrieval: {result.get('retrieval_time', 0):.4f}s | "
-            f"Rerank: {result.get('rerank_time', 0):.4f}s | "
-            f"Generation: {result.get('generation_time', 0):.4f}s | "
-            f"Total: {result.get('total_time', 0):.4f}s"
+            f"  Retrieval: {result.get('retrieval_time', 0)}s | "
+            f"Generation: {result.get('generation_time', 0)}s | "
+            f"Total: {result.get('total_time', 0)}s"
         )
         print(f"{'='*55}\n")

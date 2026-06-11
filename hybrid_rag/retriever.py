@@ -135,7 +135,7 @@ def _vector_fetch(
     the WHERE filter produces fewer matches than n_results (fix #2).
     """
     bge_q        = _bge_query(query)                    # fix #1
-    where_filter = {"company": company} if company else None
+    where_filter = {"$and": [{"company": company}, {"year": "2025"}]}
 
     kwargs = dict(
         query_texts=[bge_q],

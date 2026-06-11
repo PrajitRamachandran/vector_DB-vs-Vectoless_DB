@@ -2,168 +2,175 @@
   "metadata": {
     "total_questions": 20,
     "companies": ["NVIDIA", "MICROSOFT", "NETFLIX", "AMAZON"],
-    "categories": ["financial_metrics", "risk_factors", "business_segments", "strategy"]
+    "categories": [
+  "financial_metrics",
+  "risk_factors",
+  "business_segments",
+  "strategic_development"
+]
   },
-  "questions": [
+  "questions":
+
+[
   {
     "id": "1",
     "company": "Amazon",
-    "question": "What was Amazon's free cash flow for 2025, and how is it calculated based on its cash flow reconciliation?",
-    "category": "financial_metrics",
+    "question": "Regarding the subsidiary dedicated to cloud computing and on-demand technology provisioning, what was the exact gigawatt increment in energy infrastructure installed during the latest fiscal year, and what is the trajectory for this specific resource metric by the conclusion of 2027?",
+    "category": "business_operations",
     "difficulty": "hard",
-    "reference_answer": "Free cash flow for 2025 was $11,194 million, calculated as net cash provided by operating activities of $139,514 million less purchases of property and equipment, net of proceeds from sales and incentives of $128,320 million."
+    "reference_answer": "The subsidiary added 3.9 gigawatts (\"GW\") of new power capacity in 2025 and expects to double total power capacity by the end of 2027.[cite: 1]"
   },
   {
     "id": "2",
-    "company": "Microsoft",
-    "question": "According to microsoft_10k.pdf, what were Microsoft's gross unrecognized tax benefits related to uncertain tax positions as of June 30, 2025, and how much of this tax benefit would affect the effective tax rate if recognized?",
+    "company": "Amazon",
+    "question": "In the third quarter of the most recent fiscal cycle, the e-commerce giant recorded a significant financial hit under 'Other operating expense (income), net' to resolve a legal dispute with a major federal consumer protection agency. What was the exact monetary value of this regulatory resolution?",
     "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "Gross unrecognized tax benefits were $24.7 billion, and $21.2 billion of the resulting tax benefit would affect the effective tax rate if recognized."
+    "reference_answer": "The company recorded $2.5 billion of expense related to the settlement of a lawsuit with the FTC in Q3 2025.[cite: 1]"
   },
   {
     "id": "3",
     "company": "Amazon",
-    "question": "What was the carrying value of Amazon's equity investments in private companies not accounted for under the equity-method as of December 31, 2025?",
+    "question": "Did the Seattle-based retailer adjust the estimated operational longevity of its computing hardware and network infrastructure during the periods discussed, and what were the specific year-over-year modifications to these timeframes?",
     "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "As of December 31, 2025, these investments had a carrying value of $16.2 billion."
+    "reference_answer": "Yes, effective January 1, 2024, the company changed its estimate of the useful lives for its servers from five to six years, and effective January 1, 2025, it changed the estimate of the useful lives of a subset of its servers and networking equipment from six to five years.[cite: 1]"
   },
   {
     "id": "4",
-    "company": "Microsoft",
-    "question": "What was the total amount of Microsoft's lease commitments that had not yet commenced as of June 30, 2025?",
-    "category": "financial_metrics",
+    "company": "Amazon",
+    "question": "Which major aviation enterprise, recognized globally by gross revenue, committed to outfitting a fleet of 500 of its aircraft by 2028 with the upcoming low Earth orbit broadband constellation developed by the company?",
+    "category": "strategic_development",
     "difficulty": "hard",
-    "reference_answer": "As of June 30, 2025, Microsoft had additional leases, primarily for datacenters, that had not yet commenced of $92.7 billion."
+    "reference_answer": "Delta Airlines has announced it chose the satellite network for its future Wi-Fi, beginning with 500 planes in 2028.[cite: 1]"
   },
   {
     "id": "5",
-    "company": "Netflix",
-    "question": "What was the constant currency percentage change in streaming revenues for Netflix's LATAM region for the year ended December 31, 2025 compared to the prior year?",
+    "company": "Amazon",
+    "question": "Comparing the proprietary third-generation custom artificial intelligence silicon slated for initial shipments to the preceding iteration, what is the stated percentage improvement range in terms of cost-to-output efficiency?",
     "category": "company_performance",
     "difficulty": "hard",
-    "reference_answer": "The constant currency percentage change in streaming revenues for the LATAM region was 23%."
+    "reference_answer": "The third-generation silicon is 30-40% more price-performant than the second-generation version.[cite: 1]"
   },
   {
     "id": "6",
-    "company": "NVIDIA",
-    "question": "What was the net effect on NVIDIA's gross margin from inventory provisions and sales of items previously written down in fiscal year 2026?",
-    "category": "company_performance",
+    "company": "Microsoft",
+    "question": "In the first quarter of the 2024 calendar year, the Redmond-based software giant entered into a non-exclusive intellectual property arrangement with a specific machine learning startup. Which board member was recused from the approval process due to their co-founder status and equity affiliations with this startup?",
+    "category": "strategic_development",
     "difficulty": "hard",
-    "reference_answer": "The net effect on our gross margin from inventory provisions and sales of items previously written down was an unfavorable impact of 2.6% in fiscal year 2026."
+    "reference_answer": "Reid Hoffman, who is a co-founder of and serves on the board of directors of the startup, did not participate in the approval of the transaction.[cite: 2]"
   },
   {
     "id": "7",
-    "company": "Netflix",
-    "question": "According to netflix_10k.pdf, what were the primary operational and financial drivers for the increase in Netflix's net income for the year ended December 31, 2025?",
-    "category": "company_performance",
+    "company": "Microsoft",
+    "question": "Following audits covering a nearly decade-long period starting in 2004, the domestic revenue collection agency issued notices proposing adjustments related to intercompany pricing strategies. Excluding any potential supplementary charges or accrued interest, what is the principal monetary shortfall the agency is attempting to recover?",
+    "category": "risk_factors",
     "difficulty": "hard",
-    "reference_answer": "The increase was primarily due to a $2,909 million increase in operating income, driven by a $6,182 million increase in revenues, which was partially offset by a $2,237 million increase in cost of revenues (primarily due to the increase in content amortization and other cost of revenues) and a $487 million increase in the provision for income taxes."
+    "reference_answer": "The agency is seeking an additional tax payment of $28.9 billion.[cite: 2]"
   },
   {
     "id": "8",
-    "company": "NVIDIA",
-    "question": "What was the total revenue generated from NVIDIA's Professional Visualization specialized market for fiscal year 2026 compared to fiscal year 2025?",
-    "category": "company_performance",
+    "company": "Microsoft",
+    "question": "In late November 2023, a highly sophisticated threat actor breached a legacy test account to ultimately exfiltrate source code. What exact credential-compromising methodology was utilized to initially penetrate the test environment?",
+    "category": "risk_factors",
     "difficulty": "hard",
-    "reference_answer": "NVIDIA's Professional Visualization revenue was $3,191 million for fiscal year 2026 compared to $1,878 million for fiscal year 2025."
+    "reference_answer": "The threat actor used a password spray attack to compromise the legacy test account.[cite: 2]"
   },
   {
     "id": "9",
-    "company": "Amazon",
-    "question": "What is the delivery time frame for Amazon Now, and what impact has it had on Prime members' shopping behavior in India?",
+    "company": "Microsoft",
+    "question": "Which specific licensing framework is tailored for smaller to mid-sized entities seeking to acquire perpetual rights or subscriptions to cloud and on-premises software across a thirty-six month term, uniquely incorporating maintenance and support benefits by default?",
     "category": "business_operations",
     "difficulty": "hard",
-    "reference_answer": "Amazon Now is ultra-fast delivery on thousands of items within 20 minutes. In India, Amazon Now orders are increasing 25% month-over-month, with Prime members tripling their shopping frequency once they start using it."
+    "reference_answer": "Open Value agreements are designed for small and medium organizations to license over a three-year period, and Software Assurance is included.[cite: 2]"
   },
   {
     "id": "10",
     "company": "Microsoft",
-    "question": "According to microsoft_10k.pdf, what was the financial impact on depreciation and amortization expense and net income for the year ended June 30, 2025, due to the change in estimate of the useful lives of Microsoft's servers and networking equipment?",
-    "category": "business_operations",
+    "question": "With the enactment of the newest federal tax framework in July 2025, what precise percentage rate is established for the global intangible low-taxed income metric starting in the 2027 fiscal cycle for the enterprise?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "was an increase in depreciation and amortization expense of $1.4 billion and a reduction in net income of $1.0 billion, or $0.10 per basic share and $0.10 per diluted share"
+    "reference_answer": "The legislation provides a U.S. global intangible low-taxed income effective tax rate of 14% effective fiscal year 2027 for the company.[cite: 2]"
   },
   {
     "id": "11",
-    "company": "Amazon",
-    "question": "What was the total owned square footage operated by Amazon internationally for fulfillment, data centers, and other purposes as of December 31, 2025?",
-    "category": "business_operations",
+    "company": "Netflix",
+    "question": "Regarding the expensing of the capitalized costs associated with the catalog of visual entertainment, what percentage of the asset's value is typically recognized on the income statement within the first forty-eight months following its initial availability on the platform?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "Amazon operated 20,660 thousand owned square footage internationally for fulfillment, data centers, and other facilities."
+    "reference_answer": "On average, over 90% of a licensed or produced content asset is expected to be amortized within four years after its month of first availability.[cite: 3]"
   },
   {
     "id": "12",
-    "company": "Microsoft",
-    "question": "What was the total square footage of Microsoft's properties owned and leased domestically (U.S.) and internationally as of June 30, 2025?",
-    "category": "business_operations",
+    "company": "Netflix",
+    "question": "If the proposed consolidation with the entity that owns a prominent premium cable network and its namesake streaming platform fails to materialize due to a lack of regulatory clearance or other specified contractual triggers, what is the exact magnitude of the financial penalty the streaming pioneer is obliged to remit?",
+    "category": "risk_factors",
     "difficulty": "hard",
-    "reference_answer": "In the U.S., Microsoft owned 34 million square feet and leased 23 million square feet (Total 57 million). Internationally, it owned 13 million square feet and leased 27 million square feet (Total 40 million)."
+    "reference_answer": "A termination fee of $5.8 billion may be payable if the agreement is terminated under specified circumstances.[cite: 3]"
   },
   {
     "id": "13",
-    "company": "NVIDIA",
-    "question": "What financial impact did the US government's export license requirement for H20 integrated circuits to China have on NVIDIA in the first quarter of fiscal year 2026?",
-    "category": "risk_factors",
+    "company": "Netflix",
+    "question": "During the third quarter of the most recent fiscal period, the company recognized a substantial expense tied to jurisdictional levies outside of standard corporate earnings taxes in a major South American market. What was the exact dollar value of the cumulative charge booked due to developments in judicial proceedings involving another taxpayer?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "We incurred a $4.5 billion charge in the first quarter of fiscal year 2026 associated with H20 for excess inventory and purchase obligations, as the demand for H20 products diminished."
+    "reference_answer": "The cumulative loss recognized as an operating expense in the third quarter related to non-income tax assessments with the Brazilian tax authorities was approximately $619 million.[cite: 3]"
   },
   {
     "id": "14",
     "company": "Netflix",
-    "question": "According to netflix_10k.pdf, what are the specific multiemployer pension plan risks identified by Netflix regarding withdrawal or underfunded statuses?",
-    "category": "risk_factors",
+    "question": "For agreements encompassing traditional cinematic output deals or multi-season episodic licenses where the exact quantity of deliverables is not yet determinable, what is management's forecasted range for these off-balance-sheet commitments over the subsequent thirty-six month period?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "(i) contributions made by the Company to the multiemployer pension plans may be used to provide benefits to employees of other participating employers; (ii) if the Company chooses to stop participating in the multiemployer pension plans, it may be required to pay those plans an amount based on the underfunded status of the plan; and (iii) if a company stops contributing to the multiemployer pension plan, the unfunded obligations of the plan may become the obligation of the remaining participating employers."
+    "reference_answer": "These unknown obligations are expected to be significant and could include approximately $1 billion to $4 billion over the next three years.[cite: 3]"
   },
   {
     "id": "15",
-    "company": "NVIDIA",
-    "question": "According to nvidia_10k.pdf, what preliminary finding did China's antitrust regulators publish on September 15, 2025, regarding NVIDIA's compliance with U.S. export controls and its Mellanox acquisition?",
-    "category": "risk_factors",
+    "company": "Netflix",
+    "question": "To facilitate a monumental media merger, the company established a specific multi-tranche credit instrument on December 19, 2025. What are the specific durations and borrowing capacities of the two distinct tranches within this delayed draw facility?",
+    "category": "strategic_development",
     "difficulty": "hard",
-    "reference_answer": "On September 15, 2025, China's antitrust regulators published their preliminary finding that our compliance with applicable U.S. export controls, which required us to offer degraded products to the Chinese market, discriminated unfairly against customers in the China market and therefore violated the terms of China's approval of our Mellanox acquisition."
+    "reference_answer": "The agreement provides for a two-year $10 billion unsecured delayed draw term loan credit facility and a three-year $10 billion unsecured delayed draw term loan credit facility.[cite: 3]"
   },
   {
     "id": "16",
-    "company": "Netflix",
-    "question": "What was the cumulative loss recognized by Netflix as an operating expense in the third quarter of 2025 regarding its non-income tax assessments with the Brazilian tax authorities?",
-    "category": "risk_factors",
+    "company": "NVIDIA",
+    "question": "Due to sudden regulatory shifts imposed by the federal government in April of the latest calendar year regarding bandwidth thresholds for shipments to a designated Group D:5 nation, the semiconductor designer suffered a massive financial impairment in Q1. What was the exact monetary value of the write-down linked to redundant stock and non-cancellable supplier commitments for this restricted silicon?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "The cumulative loss recognized as an operating expense in the third quarter of the current year related to non-income tax assessments with the Brazilian tax authorities was approximately $619 million."
+    "reference_answer": "The company incurred a $4.5 billion charge in the first quarter of fiscal year 2026 for excess inventory and purchase obligations due to these requirements.[cite: 4]"
   },
   {
     "id": "17",
     "company": "NVIDIA",
-    "question": "According to nvidia_10k.pdf, what specific core functions is the NVIDIA Rubin platform architecture built to address, and what scale of token cost reduction does it offer over Blackwell?",
+    "question": "Late in the 2025 calendar year, the corporation secured non-exclusive rights to a language processing unit framework from a private entity, capitalizing a massive intangible asset without acquiring customer contracts. What was the total consideration for this arrangement, including both the immediate cash outlay and the sum payable within twelve months?",
     "category": "strategic_development",
     "difficulty": "hard",
-    "reference_answer": "Built for agentic AI and reasoning, it excels at processing multi-step problem-solving and massive long-context workflows, delivering up to a 10x reduction in cost per token compared to Blackwell."
+    "reference_answer": "Total consideration consists of $13.0 billion paid at closing and $4 billion, inclusive of imputed interest, payable within one year.[cite: 4]"
   },
   {
     "id": "18",
-    "company": "Amazon",
-    "question": "How much new power capacity did AWS add in 2025, and what is its expectation for total power capacity?",
-    "category": "strategic_development",
+    "company": "NVIDIA",
+    "question": "The forthcoming data center architecture, intentionally designed for multi-step algorithms and physical-world simulations rather than traditional generative text, promises a dramatic economic efficiency improvement over its immediate predecessor. What is the quantified magnitude of the drop in expenditure required to generate a single discrete unit of textual output?",
+    "category": "company_performance",
     "difficulty": "hard",
-    "reference_answer": "AWS added 3.9 gigawatts (\"GW\") of new power capacity in 2025, expects to double total power capacity by the end of 2027."
+    "reference_answer": "It delivers up to a 10x reduction in cost per token compared to the previous architecture.[cite: 4]"
   },
   {
     "id": "19",
-    "company": "Netflix",
-    "question": "What specific debt facilities and commitment arrangements did Netflix secure in December 2025 to fund the proposed acquisition of WBD's streaming and studios businesses?",
-    "category": "strategic_development",
+    "company": "NVIDIA",
+    "question": "In mid-September of the most recent fiscal cycle, a foreign regulatory body alleged that the company's adherence to certain North American geopolitical trade mandates inherently violated the conditional approvals previously granted for a 2020 networking acquisition. Which acquired subsidiary was at the center of this preliminary discriminatory finding?",
+    "category": "risk_factors",
     "difficulty": "hard",
-    "reference_answer": "Netflix entered into a bridge commitment letter for up to a $59 billion senior unsecured bridge term loan facility on December 4, 2025. On December 19, 2025, Netflix replaced a portion of those commitments by entering into a $5 billion senior unsecured revolving credit facility and a senior unsecured delayed draw credit facility providing for a two-year $10 billion unsecured delayed draw term loan facility and a three-year $10 billion unsecured delayed draw term loan facility."
+    "reference_answer": "The preliminary finding centered on the terms of the approval for the Mellanox acquisition.[cite: 4]"
   },
   {
     "id": "20",
     "company": "NVIDIA",
-    "question": "What were the strategic intent and monetary volume of NVIDIA's investments in private companies and infrastructure funds during fiscal year 2026?",
-    "category": "strategic_development",
+    "question": "To expedite the construction of specialized computing infrastructure by emerging partners, the hardware designer took on contingent liabilities serving as a backstop for real estate and power agreements. What is the aggregate gross exposure assumed under these surrogate financial pledges, for which the company received equity warrants in exchange?",
+    "category": "financial_metrics",
     "difficulty": "hard",
-    "reference_answer": "NVIDIA invested $17.5 billion in private companies and infrastructure funds, primarily to support early-stage startups. These investments include AI model makers that purchase our products directly or through CSPs."
+    "reference_answer": "The maximum gross exposure under all such agreements is $3.5 billion.[cite: 4]"
   }
 ]
 }

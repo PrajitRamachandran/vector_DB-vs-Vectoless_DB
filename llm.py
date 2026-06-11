@@ -154,14 +154,15 @@ def format_context(retrieved_chunks: list[dict]) -> str:
             continue
 
         primary_text = child_text or parent_text
+
         context_parts.append(
             f"[Source {i} - {company}, Page {page}]\n"
-            f"Relevant excerpt: {_trim_text(primary_text, 450)}"
+            f"Relevant excerpt: {primary_text}"
         )
 
         if child_text and parent_text and child_text != parent_text:
             context_parts.append(
-                f"Broader context: {_trim_text(parent_text, 350)}"
+                f"Broader context: {parent_text}"
             )
 
     return "\n\n".join(context_parts)

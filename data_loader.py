@@ -84,17 +84,29 @@ def get_new_pdfs(raw_dir: str, manifest: dict) -> list[Path]:
 # EXTRACTION
 # ─────────────────────────────────────────────────────────
 
+import fitz
+import pymupdf4llm
+from pathlib import Path
+import re
+
+import pymupdf4llm
+import re
+from pathlib import Path
+
 def extract_text_from_pdf(pdf_path: Path) -> list[dict]:
     """
-    Extracts text page by page from a single PDF.
+    Extracts text page by page from a single PDF using Markdown 
+    to preserve tabular structure.
     """
-    doc          = fitz.open(str(pdf_path))
     company_name = re.sub(r'[_\-](10k|10K|annual|report).*', '', pdf_path.stem).upper()
-    pages        = []
+    pages = []
 
-    for page_num in range(len(doc)):
-        page = doc[page_num]
-        text = page.get_text()
+    # Process the entire document at once to prevent file handle leaks
+    # page_chunks=True returns a list of dicts: [{'text': '...', 'metadata': ...}, ...]
+    md_pages = pymupdf4llm.to_markdown(str(pdf_path), page_chunks=True)
+
+    for i, page_data in enumerate(md_pages):
+        text = page_data.get("text", "")
 
         if len(text.strip()) < 50:   # skip blank/image-only pages
             continue
@@ -103,13 +115,11 @@ def extract_text_from_pdf(pdf_path: Path) -> list[dict]:
             "text"        : text,
             "source"      : pdf_path.name,
             "company"     : company_name,
-            "page"        : page_num + 1,
-            "total_pages" : len(doc)
+            "page"        : i + 1,
+            "total_pages" : len(md_pages)
         })
 
-    doc.close()
     return pages
-
 
 # ─────────────────────────────────────────────────────────
 # CLEANING

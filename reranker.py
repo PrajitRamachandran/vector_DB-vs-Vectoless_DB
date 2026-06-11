@@ -1,16 +1,10 @@
-# reranker.py
-# Cross-encoder reranker — runs AFTER retrieval to re-score chunks.
-# Unlike the embedding model which encodes query and chunk separately,
-# a cross-encoder reads both together and gives a much more accurate score.
-# Adds ~1-2 seconds but significantly improves which chunk ranks first.
-
 from sentence_transformers import CrossEncoder
 import config
 
 _reranker = None
 
-RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-# Small (~80MB), fast, works well for passage re-ranking
+RERANKER_MODEL = "BAAI/bge-reranker-large"
+
 
 
 def load_reranker():
