@@ -12,11 +12,11 @@ All three pipelines share preprocessing, company-aware query cleanup, reranking,
 
 - 4 public 10-K reports: Amazon, Microsoft, Netflix, and NVIDIA
 - 465 raw PDF pages
-- 2,010 parent chunks and 7,913 child chunks
-- 100 benchmark questions
-- 25 questions per company
-- 52 category labels
-- Difficulty mix: 29 easy, 39 medium, 32 hard
+- 2,467 parent chunks and 8,625 child chunks
+- 20 benchmark questions
+- 5 questions per company
+- 4 category labels
+- Difficulty mix: 20 hard
 
 ## What This Project Does
 
@@ -153,6 +153,28 @@ The older two-way benchmark is still preserved in:
 - `evaluation/results/full_results.csv`
 - `evaluation/results/chart*.png`
 
+## RAGAS Metrics
+
+### RAGAS post chunking and embedding optimisation with direct questions (120)
+
+| Metric               | Vector RAG | Vectorless RAG | Hybrid RAG | Best       |
+| -------------------- | ---------: | -------------: | ---------: | ---------- |
+| Answer Relevancy     |     0.8539 |     **0.9017** |     0.8905 | Vectorless |
+| Faithfulness         |     0.7684 |         0.7620 | **0.7771** | Hybrid     |
+| Context Precision    |     0.7190 |     **0.8050** |     0.6866 | Vectorless |
+| Context Recall       |     0.8167 |     **0.9153** |     0.8406 | Vectorless |
+| Contextual Relevancy |     0.7190 |     **0.8050** |     0.6866 | Vectorless |
+
+### RAGAS with tough questions (20)
+
+| Metric               | Vector RAG | Vectorless RAG | Hybrid RAG | Best   |
+| -------------------- | ---------: | -------------: | ---------: | ------ |
+| Answer Relevancy     | **0.7618** |         0.5499 |     0.6690 | Vector |
+| Faithfulness         | **0.7368** |         0.5702 |     0.0250 | Vector |
+| Context Precision    | **0.6286** |         0.4464 |     0.0000 | Vector |
+| Context Recall       | **0.9286** |         0.5769 |     0.0000 | Vector |
+| Contextual Relevancy | **0.6286** |         0.4464 |     0.0000 | Vector |
+
 ### Aggregate metrics
 
 | Method | Avg judge score | Pass rate | Avg retrieval time | Avg generation time | Avg total time |
@@ -285,7 +307,7 @@ rag-benchmark/
 - The evaluation results are tied to live Mistral API access.
 - The saved CSV files are snapshots and may change when the benchmark is rerun.
 - The current implementation is a prototype benchmark, not a packaged production application.
-- The question set in `evaluation/test_questions.json` currently contains 100 questions, not 20. The older 20-question note in earlier drafts is outdated.
+- The question set in `evaluation/test_questions.json` currently contains 20 questions. The older 100-question note in earlier drafts is outdated.
 - `config.py` currently uses `BAAI/bge-base-en-v1.5` for embeddings and `mistral-medium-latest` for both answer generation and judging.
 
 ## Summary
