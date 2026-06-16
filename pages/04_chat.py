@@ -16,6 +16,21 @@ from streamlit_app.services.rag_service import (
     ask_question,
     clear_pipeline_cache
 )
+import uuid
+import config
+
+from streamlit_app.database.repository import (
+    save_conversation,
+    save_retrieved_chunks,
+    save_log
+)
+
+if "session_id" not in st.session_state:
+
+    st.session_state.session_id = str(
+        uuid.uuid4()
+    )
+
 
 # ============================================================
 # PAGE CONFIG
@@ -160,6 +175,78 @@ if question:
                 "No answer generated."
             )
 
+            chat_id = save_conversation(
+
+                session_id=
+                    st.session_state.session_id,
+
+                method=
+                    retrieval_method,
+
+                model_name=
+                    config.LLM_MODEL_ID,
+
+                prompt=
+                    question,
+
+                response=
+                    answer,
+
+                company_filter=
+                    rag_result.get(
+                        "company_filter"
+                    ),
+
+                retrieval_latency=
+                    rag_result.get(
+                        "retrieval_time"
+                    ),
+
+                rerank_latency=
+                    rag_result.get(
+                        "rerank_latency"
+                    ),
+
+                generation_latency=
+                    rag_result.get(
+                        "generation_time"
+                    ),
+
+                total_latency=
+                    rag_result.get(
+                        "total_time"
+                    ),
+
+                vector_candidates=
+                    rag_result.get(
+                        "vector_candidates"
+                    ),
+
+                bm25_candidates=
+                    rag_result.get(
+                        "bm25_candidates"
+                    ),
+
+                fused_candidates=
+                    rag_result.get(
+                        "fused_candidates"
+                    ),
+
+                status="SUCCESS"
+            )
+
+            retrieved_chunks = rag_result.get(
+                "retrieved",
+                []
+            )
+
+            if retrieved_chunks:
+
+                save_retrieved_chunks(
+                    chat_id,
+                    retrieved_chunks
+                )
+
             st.markdown(answer)
 
             st.caption(
@@ -243,6 +330,22 @@ if question:
 
         else:
 
+            save_conversation(
+                session_id=
+                    st.session_state.session_id,
+                method=
+                    retrieval_method,
+                model_name=
+                    config.LLM_MODEL_ID,
+                prompt=
+                    question,
+                response=
+                    "",
+                status="FAILED",
+                error_message=
+                    result["error"]
+            )
+                        
             st.error(
                 result["error"]
             )

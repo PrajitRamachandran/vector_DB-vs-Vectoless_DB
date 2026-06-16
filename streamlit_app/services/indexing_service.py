@@ -165,7 +165,11 @@ def preprocess_documents():
 # VECTOR INDEX
 # ============================================================
 
-def build_vector_index():
+def build_vector_index(
+    progress_callback=None,
+    stage_callback=None,
+    log_callback=None
+):
     """
     Builds ChromaDB index
     using processed chunks.

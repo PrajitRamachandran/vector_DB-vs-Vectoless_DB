@@ -101,10 +101,14 @@ def retrieve(
     start_time = time.perf_counter()
 
     query_info   = preprocess_query(query)
-    company      = query_info["company"]
+    company = query_info.get("company")
     # Use the semantic query so dense retrieval keeps the company name and
     # avoids possessive artifacts like "'s".
-    raw_query    = query_info["semantic_query"] or query_info["original"] or query
+    raw_query = (
+        query_info.get("semantic_query")
+        or query_info.get("original")
+        or query
+    )
 
     # Build the BGE-prefixed query string (fix #1)
     bge_q = _bge_query(raw_query)

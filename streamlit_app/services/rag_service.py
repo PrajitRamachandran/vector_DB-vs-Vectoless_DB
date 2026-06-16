@@ -102,6 +102,7 @@ def ask_question(
 
         return {
             "success": True,
+            "method": method,
             "result": result
         }
 

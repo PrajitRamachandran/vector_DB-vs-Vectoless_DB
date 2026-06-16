@@ -303,6 +303,7 @@ def run_preprocessing_pipeline() -> dict:
         manifest[pdf_path.name] = {
             "hash"          : get_file_hash(str(pdf_path)),
             "processed_at"  : datetime.now().isoformat(),
+            "pages_count": len(pages),
             "parents_count" : len(new_p),
             "children_count": len(new_c)
         }

@@ -1,9 +1,15 @@
 # pages/dashboard.py
-
+import plotly.graph_objects as go
 from pathlib import Path
 import json
 import pandas as pd
 import streamlit as st
+from datetime import datetime
+from streamlit_app.database.repository import (
+    get_conversations,
+    get_evaluations,
+    get_dashboard_stats
+)
 
 # Page Config
 
@@ -109,9 +115,38 @@ st.title("Dashboard")
 st.caption(
     "Financial RAG Benchmark Monitoring"
 )
-
-
 # Top Metrics
+
+stats = get_dashboard_stats()
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric(
+        "Total Chats",
+        stats["total_chats"]
+    )
+
+with col2:
+    st.metric(
+        "Methods Used",
+        stats["methods_used"]
+    )
+
+with col3:
+    st.metric(
+        "Avg Latency",
+        round(
+            stats["avg_latency"] or 0,
+            2
+        )
+    )
+
+with col4:
+    st.metric(
+        "Evaluation Runs",
+        stats["evaluation_runs"]
+    )
 
 pdf_count = len(manifest)
 parent_count = len(parents)
@@ -156,23 +191,43 @@ st.subheader("Dataset Overview")
 if manifest:
   rows = []
   for filename, data in manifest.items():
-    rows.append(
-       {
-        "PDF": filename,
-        "Pages": data.get(
-          "pages_count",
-          "-"
+    rows.append({
+    "PDF": filename,
+
+    "Pages":
+        data.get(
+            "pages_count",
+            "-"
         ),
-        "Chunks": data.get(
-          "chunks_count",
-          "-"
+
+    "Parent Chunks":
+        data.get(
+            "parents_count",
+            0
         ),
-        "Processed At": data.get(
-          "processed_at",
-          "-"
+
+    "Child Chunks":
+        data.get(
+            "children_count",
+            0
+        ),
+
+    "Total Chunks":
+        data.get(
+            "parents_count",
+            0
+        ) +
+        data.get(
+            "children_count",
+            0
+        ),
+
+    "Processed At":
+        data.get(
+            "processed_at",
+            "-"
         )
-      }
-      )
+})
 
   df = pd.DataFrame(rows)
   st.dataframe(
@@ -256,6 +311,127 @@ else:
   st.warning(
     "No evaluation results found."
   )
+
+# ============================================================
+# EVALUATION SUMMARY
+# ============================================================
+
+evaluations = get_evaluations()
+
+if not evaluations:
+
+    st.info(
+        "No benchmark results available yet."
+    )
+
+else:
+
+    leaderboard_df = pd.DataFrame(
+        evaluations
+    )
+
+    leaderboard_df = (
+        leaderboard_df
+        .sort_values(
+            "overall_score",
+            ascending=False
+        )
+    )
+
+        
+    # Benchmark LeaderBoard
+
+    st.subheader(
+        "Method Comparison Radar"
+    )
+
+    metrics = [
+        "faithfulness",
+        "answer_relevancy",
+        "context_precision",
+        "context_recall"
+    ]
+
+    fig = go.Figure()
+
+    for _, row in leaderboard_df.iterrows():
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=[
+                    row[m]
+                    for m in metrics
+                ],
+
+                theta=[
+                    "Faithfulness",
+                    "Answer Relevancy",
+                    "Context Precision",
+                    "Context Recall"
+                ],
+
+                fill="toself",
+
+                name=row["method"]
+            )
+        )
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0,1]
+            )
+        ),
+        showlegend=True
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+    # Recent Chats
+
+    st.divider()
+
+    st.subheader(
+        "Recent Conversations"
+    )
+
+    recent = get_conversations()
+
+    if len(recent) > 0:
+
+        recent_df = pd.DataFrame(
+            recent
+        )
+
+        display_cols = [
+
+            col
+
+            for col in [
+                "timestamp",
+                "method",
+                "prompt"
+            ]
+
+            if col in recent_df.columns
+        ]
+
+        st.dataframe(
+            recent_df[
+                display_cols
+            ].head(10),
+            use_container_width=True
+        )
+
+    else:
+
+        st.info(
+            "No conversations found."
+        )
 
 
 # System Health

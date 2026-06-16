@@ -1,43 +1,50 @@
 {
   "amazon_10k.pdf": {
     "hash": "9ce14026d33e33b86985da7b29a87086",
-    "processed_at": "2026-06-10T15:13:13.198025",
+    "processed_at": "2026-06-16T14:48:04.507501",
+    "pages_count": 92,
     "parents_count": 508,
     "children_count": 1747
   },
-  "microsoft_10k.pdf": {
-    "hash": "5bb6a471ac6f08757bcb3cf3f96efe64",
-    "processed_at": "2026-06-10T15:14:05.896941",
-    "parents_count": 742,
-    "children_count": 2635
-  },
-  "netflix_10k.pdf": {
-    "hash": "b829b52858cd2a2cffd1c1bcf04e2d58",
-    "processed_at": "2026-06-10T15:14:51.152009",
-    "parents_count": 668,
-    "children_count": 2310
-  },
-  "nvidia_10k.pdf": {
-    "hash": "d16543b9ca44f86baf6d9933dd97058d",
-    "processed_at": "2026-06-10T15:15:25.333887",
-    "parents_count": 549,
-    "children_count": 1933
-  },
   "asus_10k.pdf": {
     "hash": "321baafd33d63d726fbb329032f5fcb3",
-    "processed_at": "2026-06-15T12:26:54.562283",
+    "processed_at": "2026-06-16T14:49:14.098764",
+    "pages_count": 176,
     "parents_count": 656,
     "children_count": 2282
   },
   "cocacola_10k.pdf": {
     "hash": "1e907a85a547ff62066af3b270fa98c9",
-    "processed_at": "2026-06-15T12:46:15.682773",
+    "processed_at": "2026-06-16T14:50:24.040262",
+    "pages_count": 192,
     "parents_count": 1102,
     "children_count": 3845
   },
+  "microsoft_10k.pdf": {
+    "hash": "5bb6a471ac6f08757bcb3cf3f96efe64",
+    "processed_at": "2026-06-16T14:51:13.543324",
+    "pages_count": 156,
+    "parents_count": 742,
+    "children_count": 2635
+  },
+  "netflix_10k.pdf": {
+    "hash": "b829b52858cd2a2cffd1c1bcf04e2d58",
+    "processed_at": "2026-06-16T14:51:54.493138",
+    "pages_count": 121,
+    "parents_count": 668,
+    "children_count": 2310
+  },
+  "nvidia_10k.pdf": {
+    "hash": "d16543b9ca44f86baf6d9933dd97058d",
+    "processed_at": "2026-06-16T14:52:27.297902",
+    "pages_count": 93,
+    "parents_count": 549,
+    "children_count": 1933
+  },
   "reliance_10k.pdf": {
     "hash": "0ea919d0bb2b454076cc76690f18905f",
-    "processed_at": "2026-06-16T11:44:33.364073",
+    "processed_at": "2026-06-16T14:55:19.132527",
+    "pages_count": 147,
     "parents_count": 1616,
     "children_count": 5917
   }

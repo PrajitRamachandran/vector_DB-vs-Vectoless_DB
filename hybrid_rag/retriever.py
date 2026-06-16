@@ -263,8 +263,16 @@ def retrieve(
     start_time = time.perf_counter()
     query_info = preprocess_query(query)
     company    = query_info["company"]
-    semantic_query = query_info["semantic_query"] or query_info["original"] or query
-    clean_query = query_info["clean_query"] or semantic_query
+    semantic_query = (
+        query_info.get("semantic_query")
+        or query_info.get("original")
+        or query
+    )
+
+    clean_query = (
+        query_info.get("clean_query")
+        or semantic_query
+    )
 
     # ── First-stage: both retrievers ─────────────────────────────────────────
     vector_start    = time.perf_counter()
