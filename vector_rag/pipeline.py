@@ -1,3 +1,5 @@
+#vector_rag/pipeline.py
+
 import sys
 import time
 import json
@@ -29,8 +31,6 @@ class VectorRAGPipeline:
         top_k = top_k or TOP_K
 
         ret = retrieve(question, self.collection, self.parent_lookup, top_k)
-        retrieval_time = round(ret.get("retrieval_latency", ret.get("latency", 0.0)), 4)
-        rerank_time = round(ret.get("rerank_latency", 0.0), 4)
         context = format_context(ret["chunks"])
 
         if not context:
@@ -38,13 +38,10 @@ class VectorRAGPipeline:
                 "question": question,
                 "answer": "This information was not found in the retrieved sections.",
                 "retrieved": ret["chunks"],
-                "retrieval_time": retrieval_time,
-                "rerank_time": rerank_time,
+                "retrieval_time": ret["latency"],
                 "generation_time": 0.0,
-                "total_time": round(retrieval_time + rerank_time, 4),
+                "total_time": ret["latency"],
                 "method": "vector",
-                "retrieval_latency": retrieval_time,
-                "rerank_latency": rerank_time,
                 "retrieval_error": ret.get("error"),
             }
 
@@ -56,13 +53,10 @@ class VectorRAGPipeline:
             "question": question,
             "answer": answer,
             "retrieved": ret["chunks"],
-            "retrieval_time": retrieval_time,
-            "rerank_time": rerank_time,
+            "retrieval_time": ret["latency"],
             "generation_time": gen_time,
-            "total_time": round(retrieval_time + rerank_time + gen_time, 4),
+            "total_time": round(ret["latency"] + gen_time, 4),
             "method": "vector",
-            "retrieval_latency": retrieval_time,
-            "rerank_latency": rerank_time,
             "retrieval_error": ret.get("error"),
         }
 
@@ -82,9 +76,8 @@ class VectorRAGPipeline:
             )
         print(f"{'─'*55}")
         print(
-            f"  Retrieval: {result.get('retrieval_time', 0):.4f}s | "
-            f"Rerank: {result.get('rerank_time', 0):.4f}s | "
-            f"Generation: {result.get('generation_time', 0):.4f}s | "
-            f"Total: {result.get('total_time', 0):.4f}s"
+            f"  Retrieval: {result.get('retrieval_time', 0)}s | "
+            f"Generation: {result.get('generation_time', 0)}s | "
+            f"Total: {result.get('total_time', 0)}s"
         )
         print(f"{'='*55}\n")

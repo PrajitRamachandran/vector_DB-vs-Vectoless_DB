@@ -1,15 +1,10 @@
+#utils/query_processor.py
 import re
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 import config
-
-
-def _normalize_text(text: str) -> str:
-    """Normalizes whitespace and apostrophes without changing meaning."""
-    text = (text or "").replace("’", "'")
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def detect_company(question: str) -> str | None:
@@ -44,29 +39,25 @@ def preprocess_query(question: str) -> dict:
     """
     Returns structured metadata about the question.
     """
-    question = _normalize_text(question)
+    question = question or ""
     company = detect_company(question)
     year = detect_year(question)
 
-    semantic_query = question
     clean_query = question
 
     if company:
-        # Remove possessive company mentions cleanly so we do not leave behind
-        # stray "'s" tokens that can hurt retrieval quality.
-        company_pattern = rf"(?<!\w){re.escape(company)}(?:['’]s)?(?!\w)"
+        company_pattern = rf"(?<!\w){re.escape(company)}(?!\w)"
         clean_query = re.sub(company_pattern, "", clean_query, flags=re.IGNORECASE)
 
     if year:
         year_pattern = rf"(?<!\d){re.escape(year)}(?!\d)"
         clean_query = re.sub(year_pattern, "", clean_query)
 
-    clean_query = re.sub(r"\s+", " ", clean_query).strip(" ,;:-_()[]{}'\"?!.,")
+    clean_query = re.sub(r"\s+", " ", clean_query).strip(" ,;:-_()[]{}")
 
     return {
         "original": question,
         "clean_query": clean_query,
-        "semantic_query": semantic_query,
         "company": company,
         "year": year,
     }

@@ -46,7 +46,12 @@ def get_indexed_sources(collection) -> set:
     return {m["source"] for m in results["metadatas"]}
 
 
-def index_chunks(data: dict):
+def index_chunks(
+    data: dict,
+    progress_callback=None,
+    stage_callback=None,
+    log_callback=None
+):
     """
     Indexes CHILDREN into ChromaDB (small = precise retrieval).
     Stores parent_id in metadata so retriever can look up parent context.
@@ -55,7 +60,17 @@ def index_chunks(data: dict):
     print("   VECTOR RAG INDEXER — Parent-Child + BGE + HNSW")
     print("=" * 52)
 
+    if stage_callback:
+        stage_callback(
+            "Loading ChromaDB",
+            1,
+            4
+        )
+
     collection      = get_chroma_collection()
+    if log_callback:
+        log_callback("ChromaDB initialized")
+
     indexed_sources = get_indexed_sources(collection)
     children        = data["children"]
 
@@ -65,14 +80,30 @@ def index_chunks(data: dict):
     if not new_children:
         print(f"\n✅ ChromaDB already up to date — {collection.count()} vectors\n")
         return collection
+    
+
+    if stage_callback:
+        stage_callback(
+            "Generating Embeddings",
+            2,
+            4
+        )
 
     print(f"\n📤 Indexing {len(new_children)} child chunks...")
     print(f"   Embedding model: {config.EMBEDDING_MODEL}")
 
     BATCH_SIZE = 64   # BGE base is slightly heavier — smaller batch
 
-    for i in tqdm(range(0, len(new_children), BATCH_SIZE),
-                  desc="Embedding children"):
+    total_batches = (
+    len(new_children) + BATCH_SIZE - 1
+) // BATCH_SIZE
+
+    for batch_num, i in enumerate(
+        tqdm(
+            range(0, len(new_children), BATCH_SIZE),
+            desc="Embedding children"
+        )
+    ):
         batch = new_children[i: i + BATCH_SIZE]
 
         collection.upsert(
@@ -86,6 +117,32 @@ def index_chunks(data: dict):
                 "type"     : "child"
             } for c in batch]
         )
+
+        if progress_callback:
+            progress_callback(
+                batch_num + 1,
+                total_batches
+            )
+
+        if log_callback:
+            log_callback(
+                f"Embedded batch "
+                f"{batch_num + 1}/{total_batches}"
+            )
+
+        if stage_callback:
+            stage_callback(
+                "Saving ChromaDB",
+                3,
+                4
+            )
+
+        if stage_callback:
+            stage_callback(
+                "Completed",
+                4,
+                4
+            )
 
     print(f"\n✅ ChromaDB updated — {collection.count()} total vectors\n")
     return collection

@@ -45,16 +45,22 @@ def get_chunks_hash(children: list[dict]) -> str:
     return hashlib.md5(content).hexdigest()
 
 
-def build_bm25_index(data: dict):
+def build_bm25_index(children: list[dict] | dict):
     """
     Indexes CHILDREN in BM25 (same as ChromaDB — small precise chunks).
     Stores children alongside so retriever can look up parents.
+
+    Accepts either:
+    - a list of child chunk dicts, or
+    - a dict containing a `children` key.
     """
     print("=" * 52)
     print("   VECTORLESS RAG INDEXER — BM25 + Financial Tokenizer")
     print("=" * 52)
 
-    children     = data["children"]
+    if isinstance(children, dict):
+        children = children.get("children", [])
+
     current_hash = get_chunks_hash(children)
 
     if BM25_MANIFEST_PATH.exists():
