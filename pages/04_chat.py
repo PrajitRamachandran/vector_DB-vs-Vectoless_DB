@@ -72,7 +72,9 @@ with st.sidebar:
         options=[
             "Hybrid",
             "Vector",
-            "Vectorless"
+            "Vectorless",
+            "Random",
+            "Auto"
         ],
         index=0
     )
@@ -149,7 +151,7 @@ if question:
         start_time = time.time()
 
         status.info(
-            f"Running {retrieval_method} retrieval..."
+            "Processing question..."
         )
 
         progress.progress(25)
@@ -170,10 +172,168 @@ if question:
 
             rag_result = result["result"]
 
+            intent = rag_result.get(
+                "intent"
+            )
+            
             answer = rag_result.get(
                 "answer",
                 "No answer generated."
             )
+
+            intent = rag_result.get(
+                "intent",
+                "unknown"
+            )
+
+            method_to_store = retrieval_method
+
+            # ====================================
+            # CHAT / GENERAL KNOWLEDGE
+            # ====================================
+
+            if intent == "chat":
+
+                method_to_store = "CHAT"
+
+                status.success(
+                    "💬 Chat Mode"
+                )
+
+            elif intent == "general_knowledge":
+
+                method_to_store = (
+                    "GENERAL_KNOWLEDGE"
+                )
+
+                status.success(
+                    "🧠 General Knowledge Mode"
+                )
+
+            # ====================================
+            # RANDOM
+            # ====================================
+
+            elif retrieval_method == "Random":
+
+                selected_method = (
+                    rag_result.get(
+                        "random_selected_method",
+                        "unknown"
+                    )
+                )
+
+                method_to_store = (
+                    f"Random("
+                    f"{selected_method}"
+                    f")"
+                )
+
+                status.success(
+                    f"🎲 Random Mode → "
+                    f"{selected_method.upper()}"
+                )
+
+            # ====================================
+            # AUTO
+            # ====================================
+
+            elif retrieval_method == "Auto":
+
+                selected_method = (
+                    (
+                        rag_result.get(
+                            "auto_selected_method"
+                        ) or "UNKNOWN"
+                    ).upper()
+                )
+
+                query_type = (
+                    rag_result.get(
+                        "query_type",
+                        "unknown"
+                    )
+                )
+
+                method_to_store = (
+                    f"Auto("
+                    f"{selected_method}"
+                    f")"
+                )
+
+                status.success(
+                    f"🤖 Auto Mode → "
+                    f"{selected_method.upper()} "
+                    f"({query_type})"
+                )
+
+            # ====================================
+            # NORMAL RAG
+            # ====================================
+
+            else:
+
+                status.success(
+                    f"📚 Retrieval Mode → "
+                    f"{retrieval_method}"
+                )
+
+            # ====================================================
+            # RANDOM MODE INFO
+            # ====================================================
+
+            if retrieval_method == "Random":
+
+                selected_method = rag_result.get(
+                    "random_selected_method",
+                    "unknown"
+                )
+
+                st.info(
+                    f"🎲 Random RAG selected: {selected_method.upper()}"
+                )
+
+            # ====================================================
+            # AUTO MODE INFO
+            # ====================================================
+
+            if retrieval_method == "Auto":
+
+                st.info(
+                    f"""
+                        🤖 Auto RAG
+
+                        Question Type:
+                        {rag_result.get('query_type')}
+
+                        Selected Method:
+                        {rag_result.get('auto_selected_method').upper()}
+                    """
+                )
+
+            # ====================================================
+            # METHOD FOR DB STORAGE
+            # ====================================================
+
+            method_to_store = retrieval_method
+
+            if retrieval_method == "Random":
+
+                method_to_store = (
+                    f"Random({rag_result.get('random_selected_method')})"
+                )
+
+            if retrieval_method == "Auto":
+
+                method_to_store = (
+                    f"Auto("
+                    f"{rag_result.get('auto_selected_method')}"
+                    f")"
+                )
+
+            # ====================================================
+            # SAVE CONVERSATION
+            # ====================================================
 
             chat_id = save_conversation(
 
@@ -181,7 +341,7 @@ if question:
                     st.session_state.session_id,
 
                 method=
-                    retrieval_method,
+                    method_to_store,
 
                 model_name=
                     config.LLM_MODEL_ID,
@@ -235,6 +395,10 @@ if question:
                 status="SUCCESS"
             )
 
+            # ====================================================
+            # SAVE RETRIEVED CHUNKS
+            # ====================================================
+
             retrieved_chunks = rag_result.get(
                 "retrieved",
                 []
@@ -246,6 +410,10 @@ if question:
                     chat_id,
                     retrieved_chunks
                 )
+
+            # ====================================================
+            # DISPLAY ANSWER
+            # ====================================================
 
             st.markdown(answer)
 
@@ -331,21 +499,28 @@ if question:
         else:
 
             save_conversation(
+
                 session_id=
                     st.session_state.session_id,
+
                 method=
                     retrieval_method,
+
                 model_name=
                     config.LLM_MODEL_ID,
+
                 prompt=
                     question,
+
                 response=
                     "",
+
                 status="FAILED",
+
                 error_message=
                     result["error"]
             )
-                        
+
             st.error(
                 result["error"]
             )

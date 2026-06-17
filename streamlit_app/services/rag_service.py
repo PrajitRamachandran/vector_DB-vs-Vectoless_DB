@@ -27,6 +27,23 @@ from hybrid_rag.pipeline import (
     HybridRAGPipeline
 )
 
+from random_rag.pipeline import (
+    RandomRAGPipeline
+)
+
+from auto_rag.pipeline import (
+    AutoRAGPipeline
+)
+
+from query_router.router import (
+    route
+)
+
+from llm import (
+    load_llm,
+    generate_chat_response
+)
+
 # ============================================================
 # PIPELINE CACHE
 # ============================================================
@@ -57,6 +74,16 @@ def get_hybrid_pipeline():
 
     return HybridRAGPipeline()
 
+@st.cache_resource
+def get_random_pipeline():
+
+    return RandomRAGPipeline()
+
+@st.cache_resource
+def get_auto_pipeline():
+
+    return AutoRAGPipeline()
+
 # ============================================================
 # PIPELINE ACCESS
 # ============================================================
@@ -73,6 +100,12 @@ def get_pipeline(method: str):
 
     if method == "hybrid":
         return get_hybrid_pipeline()
+    
+    if method == "random":
+        return get_random_pipeline()
+    
+    if method == "auto":
+        return get_auto_pipeline()
 
     raise ValueError(
         f"Unknown method: {method}"
@@ -86,11 +119,63 @@ def ask_question(
     question: str,
     method: str
 ):
-    """
-    Execute RAG query.
-    """
 
     try:
+
+        # ==========================================
+        # ROUTE QUESTION
+        # ==========================================
+
+        routing = route(
+            question
+        )
+
+        # ==========================================
+        # NON-RAG QUESTIONS
+        # ==========================================
+
+        if not routing["use_rag"]:
+
+            llm = load_llm()
+
+            answer = generate_chat_response(
+                llm,
+                question
+            )
+
+            return {
+
+                "success": True,
+
+                "method": "chat",
+
+                "intent":
+                    routing["intent"],
+
+                "result": {
+
+                    "answer": answer,
+
+                    "method": "chat",
+
+                    "intent":
+                        routing["intent"],
+
+                    "retrieved": [],
+
+                    "retrieval_time": 0,
+
+                    "rerank_time": 0,
+
+                    "generation_time": 0,
+
+                    "total_time": 0
+                }
+            }
+
+        # ==========================================
+        # RAG QUESTIONS
+        # ==========================================
 
         pipeline = get_pipeline(
             method
@@ -100,17 +185,30 @@ def ask_question(
             question
         )
 
+        result["intent"] = (
+            routing["intent"]
+        )
+
         return {
+
             "success": True,
+
             "method": method,
+
+            "intent":
+                routing["intent"],
+
             "result": result
         }
 
     except Exception as e:
 
         return {
+
             "success": False,
+
             "error": str(e),
+
             "traceback":
                 traceback.format_exc()
         }
@@ -127,7 +225,9 @@ def pipeline_status():
     status = {
         "vector": False,
         "vectorless": False,
-        "hybrid": False
+        "hybrid": False,
+        "random": False,
+        "auto": False
     }
 
     try:
@@ -145,6 +245,18 @@ def pipeline_status():
     try:
         get_hybrid_pipeline()
         status["hybrid"] = True
+    except:
+        pass
+
+    try:
+        get_random_pipeline()
+        status["random"] = True
+    except:
+        pass
+
+    try:
+        get_auto_pipeline()
+        status["auto"] = True
     except:
         pass
 

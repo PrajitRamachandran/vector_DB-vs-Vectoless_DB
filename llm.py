@@ -166,3 +166,53 @@ def format_context(retrieved_chunks: list[dict]) -> str:
             )
 
     return "\n\n".join(context_parts)
+
+# ================================================================================
+# GENERAL CHATTING
+# ================================================================================
+
+def generate_chat_response(
+    client,
+    question: str
+) -> str:
+
+    if client is None:
+        client = load_llm(
+            verbose=False
+        )
+
+    system_prompt = """
+You are a helpful AI assistant.
+
+You can:
+- Have normal conversations
+- Explain concepts
+- Answer general knowledge questions
+
+Be concise and helpful.
+"""
+
+    response = client.chat.completions.create(
+        model=config.LLM_MODEL_ID,
+        messages=[
+            {
+                "role": "system",
+                "content": system_prompt
+            },
+            {
+                "role": "user",
+                "content": question
+            }
+        ],
+        temperature=config.TEMPERATURE,
+        max_tokens=config.MAX_NEW_TOKENS
+    )
+
+    content = (
+        response.choices[0]
+        .message.content
+    )
+
+    return _extract_text_content(
+        content
+    )
