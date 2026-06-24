@@ -5,24 +5,81 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 import config
+import json
 
+from config import DATA_PROCESSED_DIR
+
+
+def get_known_companies():
+
+    chunks_path = (
+        Path(DATA_PROCESSED_DIR)
+        / "chunks.json"
+    )
+
+    with open(
+        chunks_path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        data = json.load(f)
+
+    companies = set()
+
+    for chunk in data["parents"]:
+
+        company = chunk.get(
+            "company"
+        )
+
+        if company:
+            companies.add(
+                company.upper()
+            )
+
+    return sorted(companies)
 
 def detect_company(question: str) -> str | None:
-    """
-    Scans the question for a known company name.
-    Returns the standardised company name (e.g. "NVIDIA") or None.
-    """
+
     q_lower = (question or "").lower()
 
-    # Check longer keywords first so longer names win.
-    for keyword, company in sorted(
-        config.KNOWN_COMPANIES.items(),
-        key=lambda item: len(item[0]),
-        reverse=True,
-    ):
-        pattern = rf"(?<!\w){re.escape(keyword.lower())}(?!\w)"
-        if re.search(pattern, q_lower):
-            return company
+    print("\n===== COMPANY MATCH DEBUG =====")
+    print("QUESTION:", q_lower)
+
+    for company in get_known_companies():
+
+        company_variants = [
+
+            company.lower(),
+
+            company.lower().replace(
+                "-",
+                " "
+            ),
+
+            company.lower().replace(
+                " ",
+                ""
+            )
+        ]
+
+        for keyword in company_variants:
+
+            pattern = (
+                rf"(?<!\w)"
+                f"{re.escape(keyword)}"
+                rf"(?!\w)"
+            )
+
+            if re.search(
+                pattern,
+                q_lower
+            ):
+                return company
+
+    print("NO COMPANY MATCH")
+    print("==============================\n")
 
     return None
 

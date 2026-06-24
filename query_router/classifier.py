@@ -53,7 +53,13 @@ DOCUMENT_METADATA_KEYWORDS = [
     "show companies",
     "available documents",
     "loaded documents",
-    "loaded reports"
+    "loaded reports",
+    "what are the documents you have",
+    "what documents do you have",
+    "documents you have",
+    "which documents do you have",
+    "what companies do you have",
+    "which companies do you have"
 ]
 
 # ==========================================================

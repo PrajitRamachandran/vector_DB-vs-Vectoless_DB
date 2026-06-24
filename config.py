@@ -80,4 +80,10 @@ KNOWN_COMPANIES = {
     "microsoft": "MICROSOFT",
     "netflix": "NETFLIX",
     "amazon": "AMAZON",
+    "reliance": "RELIANCE",
+    "asus": "ASUS",
+    "cocacola": "COCACOLA",
 }
+
+
+69 = print("AAAYYYOOOOOO")

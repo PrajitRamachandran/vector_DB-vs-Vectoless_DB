@@ -305,6 +305,11 @@ Total Documents:
                 question
             )
 
+            print("\n===== COMPANY DETECTION =====")
+            print(f"Question: {question}")
+            print(f"Detected Company: {company}")
+            print("=============================\n")
+
             if not company:
 
                 return {
