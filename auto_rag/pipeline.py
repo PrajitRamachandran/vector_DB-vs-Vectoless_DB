@@ -1,3 +1,8 @@
+import time
+
+start = time.time()
+print("Loading Auto_pipeline...")
+
 from auto_rag.classifier import (
     classify_question
 )
@@ -68,3 +73,9 @@ class AutoRAGPipeline:
         ] = query_type
 
         return result
+    
+
+print(
+    f"Auto_pipeline loaded in "
+    f"{time.time()-start:.2f}s"
+)

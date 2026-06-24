@@ -11,6 +11,11 @@ Uses Streamlit caching so pipelines
 are only loaded once.
 """
 
+import time
+
+start = time.time()
+print("Loading rag_service...")
+
 import traceback
 
 import streamlit as st
@@ -44,6 +49,30 @@ from llm import (
     generate_chat_response
 )
 
+from streamlit_app.services.document_service import (
+    get_document_metadata
+)
+
+from streamlit_app.services.evaluation_explorer import (
+    get_evaluation_summary
+)
+
+from utils.query_processor import (
+    detect_company
+)
+
+from streamlit_app.services.company_summary_service import (
+    get_company_summary_context
+)
+
+from utils.query_processor import (
+    detect_company
+)
+
+from llm import (
+    load_llm,
+    generate_answer
+)
 # ============================================================
 # PIPELINE CACHE
 # ============================================================
@@ -130,6 +159,92 @@ def ask_question(
             question
         )
 
+        print("\n========== ROUTER DEBUG ==========")
+        print(routing)
+        print("==================================\n")
+
+        intent = routing["intent"]
+
+        # ==========================================
+        # DOCUMENT METADATA
+        # ==========================================
+
+        if intent == "document_metadata":
+
+            metadata = get_document_metadata()
+
+            companies = "\n".join(
+                [
+                    f"• {c}"
+                    for c in metadata["companies"]
+                ]
+            )
+
+            answer = f"""
+Available Companies
+
+{companies}
+
+Total Documents:
+{metadata['total_documents']}
+"""
+
+            return {
+
+                "success": True,
+
+                "method": "metadata",
+
+                "intent": intent,
+
+                "result": {
+
+                    "answer": answer,
+
+                    "retrieved": [],
+
+                    "retrieval_time": 0,
+
+                    "rerank_time": 0,
+
+                    "generation_time": 0,
+
+                    "total_time": 0
+                }
+            }
+
+        # ==========================================
+        # EVALUATION EXPLORATION
+        # ==========================================
+
+        if intent == "evaluation_exploration":
+
+            answer = get_evaluation_summary()
+
+            return {
+
+                "success": True,
+
+                "method": "evaluation",
+
+                "intent": intent,
+
+                "result": {
+
+                    "answer": answer,
+
+                    "retrieved": [],
+
+                    "retrieval_time": 0,
+
+                    "rerank_time": 0,
+
+                    "generation_time": 0,
+
+                    "total_time": 0
+                }
+            }
+
         # ==========================================
         # NON-RAG QUESTIONS
         # ==========================================
@@ -149,8 +264,7 @@ def ask_question(
 
                 "method": "chat",
 
-                "intent":
-                    routing["intent"],
+                "intent": intent,
 
                 "result": {
 
@@ -158,8 +272,7 @@ def ask_question(
 
                     "method": "chat",
 
-                    "intent":
-                        routing["intent"],
+                    "intent": intent,
 
                     "retrieved": [],
 
@@ -174,20 +287,124 @@ def ask_question(
             }
 
         # ==========================================
-        # RAG QUESTIONS
+        # LOAD PIPELINE
         # ==========================================
 
         pipeline = get_pipeline(
             method
         )
 
+        # ==========================================
+        # DOCUMENT EXPLORATION
+        # ==========================================
+
+        if intent == "document_exploration":
+            print("\nDOCUMENT EXPLORATION HIT\n")
+
+            company = detect_company(
+                question
+            )
+
+            if not company:
+
+                return {
+
+                    "success": True,
+
+                    "method": "summary",
+
+                    "intent": intent,
+
+                    "result": {
+
+                        "answer":
+                            "Company could not be identified.",
+
+                        "retrieved": []
+                    }
+                }
+
+            context = (
+                get_company_summary_context(
+                    company
+                )
+            )
+
+            if not context:
+
+                return {
+
+                    "success": True,
+
+                    "method": "summary",
+
+                    "intent": intent,
+
+                    "result": {
+
+                        "answer":
+                            f"No data found for {company}.",
+
+                        "retrieved": []
+                    }
+                }
+
+            llm = load_llm()
+
+            summary_prompt = f"""
+        Create a professional company overview.
+
+        Company:
+        {company}
+
+        Include:
+
+        1. Company Overview
+
+        2. Business Segments
+
+        3. Products and Services
+
+        4. Revenue Drivers
+
+        5. Strategic Priorities
+
+        6. Key Risks
+
+        Only use information from the context.
+        """
+
+            answer = generate_answer(
+                llm,
+                context,
+                summary_prompt
+            )
+
+            return {
+
+                "success": True,
+
+                "method": "company_summary",
+
+                "intent": intent,
+
+                "result": {
+
+                    "answer": answer,
+
+                    "retrieved": []
+                }
+            }
+
+        # ==========================================
+        # NORMAL DOCUMENT QA
+        # ==========================================
+
         result = pipeline.ask(
             question
         )
 
-        result["intent"] = (
-            routing["intent"]
-        )
+        result["intent"] = intent
 
         return {
 
@@ -195,8 +412,7 @@ def ask_question(
 
             "method": method,
 
-            "intent":
-                routing["intent"],
+            "intent": intent,
 
             "result": result
         }
@@ -273,3 +489,9 @@ def clear_pipeline_cache():
     """
 
     st.cache_resource.clear()
+
+
+print(
+    f"rag_service loaded in "
+    f"{time.time()-start:.2f}s"
+)

@@ -79,16 +79,33 @@ def generate_answer(client, context: str, question: str) -> str:
     if not context:
         return "This information was not found in the retrieved sections."
 
-    system_prompt = """You are a precise financial analyst assistant.
-Answer questions about company 10-K financial reports using only the provided context.
+    system_prompt = """
+You are a financial analyst assistant.
 
-Rules:
-1. Use only facts explicitly stated in the context.
-2. Prefer exact figures, dates, and wording from the context when available.
-3. Do not infer missing values or combine partial snippets into a new fact.
-4. If the answer is not stated directly, say: "This information was not found in the retrieved sections."
-5. Always mention which company your answer refers to.
-6. Keep the answer concise, 2 to 4 sentences maximum."""
+Answer ONLY using the provided context.
+
+For company overview or summary requests:
+
+Generate a structured summary with:
+
+1. Company Overview
+2. Business Segments
+3. Products and Services
+4. Revenue Drivers
+5. Strategic Priorities
+6. Key Risks
+
+If information is missing from the context, omit that section.
+
+Never invent facts.
+
+For factual questions:
+Answer directly and concisely using only the context.
+
+If the answer is not present, say:
+
+"This information was not found in the retrieved sections."
+"""
 
     user_message = f"""Context from financial reports. The most relevant excerpt appears first:
 {context}

@@ -15,3 +15,7 @@ DOCUMENT_METADATA = (
 DOCUMENT_EXPLORATION = (
     "document_exploration"
 )
+
+EVALUATION_EXPLORATION = (
+    "evaluation_exploration"
+)

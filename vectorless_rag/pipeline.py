@@ -1,4 +1,8 @@
 # vectorless_rag/pipeline.py
+import time
+
+start = time.time()
+print("Loading Vectorless_pipeline...")
 
 import sys
 import time
@@ -39,6 +43,9 @@ class VectorlessRAGPipeline:
     def ask(self, question: str, top_k: int = None) -> dict:
         from config import TOP_K
         top_k = top_k or TOP_K
+
+        if top_k < 15:
+            top_k = 15
 
         ret     = retrieve(question, self.bm25, self.children, self.parent_lookup, top_k)
         retrieval_time = round(ret.get("retrieval_latency", ret.get("latency", 0.0)), 4)
@@ -102,3 +109,9 @@ class VectorlessRAGPipeline:
             f"Total: {result['total_time']:.4f}s"
         )
         print(f"{'='*55}\n")
+
+
+print(
+    f"Vectorless_pipeline loaded in "
+    f"{time.time()-start:.2f}s"
+)

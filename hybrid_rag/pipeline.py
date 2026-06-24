@@ -1,4 +1,8 @@
 #hybrid_rag/pipeline.py
+import time
+
+start = time.time()
+print("Loading hybrid_pipeline...")
 
 import sys
 import time
@@ -40,6 +44,9 @@ class HybridRAGPipeline:
         from config import TOP_K
 
         top_k = top_k or TOP_K
+
+        if top_k < 15:
+            top_k = 15
 
         ret = retrieve(
             query=question,
@@ -126,3 +133,10 @@ class HybridRAGPipeline:
             f"Total: {result.get('total_time', 0)}s"
         )
         print(f"{'='*55}\n")
+
+
+
+print(
+    f"Hybrid_pipeline loaded in "
+    f"{time.time()-start:.2f}s"
+)

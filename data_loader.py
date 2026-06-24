@@ -321,7 +321,18 @@ def run_preprocessing_pipeline() -> dict:
     }
 
     save_chunks(final)
-    save_manifest(manifest)
+
+    save_manifest(
+        manifest
+    )
+
+    # generate_corpus_summary(
+    #     manifest
+    # )
+
+    # generate_company_summary(
+    #     final
+    # )
 
     print(f"\n💾 Saved {len(final['parents'])} parents, "
           f"{len(final['children'])} children")

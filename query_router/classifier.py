@@ -7,7 +7,8 @@ from query_router.intents import (
     GENERAL_KNOWLEDGE,
     DOCUMENT_QUESTION,
     DOCUMENT_METADATA,
-    DOCUMENT_EXPLORATION
+    DOCUMENT_EXPLORATION,
+    EVALUATION_EXPLORATION
 )
 
 # ==========================================================
@@ -43,7 +44,16 @@ DOCUMENT_METADATA_KEYWORDS = [
     "available companies",
     "what data do you have",
     "what reports do you have",
-    "which reports do you have"
+    "which reports do you have",
+    "which reports are available",
+    "what reports can i query",
+    "list reports",
+    "list companies",
+    "show reports",
+    "show companies",
+    "available documents",
+    "loaded documents",
+    "loaded reports"
 ]
 
 # ==========================================================
@@ -57,6 +67,7 @@ DOCUMENT_EXPLORATION_KEYWORDS = [
     "overview",
     "summary",
     "summarize",
+    "summarise",
     "highlights",
     "key highlights",
     "key findings",
@@ -111,6 +122,35 @@ FINANCIAL_TERMS = [
     "cost of revenue"
 ]
 
+
+# ==========================================================
+# EVALUATION EXPLORATION
+# ==========================================================
+
+EVALUATION_KEYWORDS = [
+    "benchmark",
+    "evaluation",
+    "judge score",
+    "ragas",
+    "faithfulness",
+    "answer relevancy",
+    "context recall",
+    "context precision",
+    "best method",
+    "compare methods",
+    "retrieval performance",
+    "which retrieval method",
+    "performed best",
+    "benchmark results",
+    "compare vector",
+    "compare hybrid",
+    "vector vs hybrid",
+    "hybrid vs vector",
+    "vector vs vectorless",
+    "compare retrieval methods"
+]
+
+
 # ==========================================================
 # GENERAL KNOWLEDGE
 # ==========================================================
@@ -163,6 +203,16 @@ def classify(question: str):
         for keyword in DOCUMENT_EXPLORATION_KEYWORDS
     ):
         return DOCUMENT_EXPLORATION
+    
+        # ------------------------------------
+    # EVALUATION EXPLORATION
+    # ------------------------------------
+
+    if any(
+        keyword in q
+        for keyword in EVALUATION_KEYWORDS
+    ):
+        return EVALUATION_EXPLORATION
 
     # ------------------------------------
     # DOCUMENT QUESTION

@@ -3,7 +3,9 @@ from query_router.classifier import (
 )
 
 from query_router.intents import (
-    DOCUMENT_QUESTION
+    DOCUMENT_QUESTION,
+    DOCUMENT_EXPLORATION,
+    EVALUATION_EXPLORATION
 )
 
 def route(question):
@@ -14,5 +16,6 @@ def route(question):
         "intent": intent,
         "use_rag": (
             intent == DOCUMENT_QUESTION
+            or intent == DOCUMENT_EXPLORATION
         )
     }

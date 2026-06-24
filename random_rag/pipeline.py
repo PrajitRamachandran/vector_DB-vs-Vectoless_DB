@@ -1,3 +1,8 @@
+import time
+
+start = time.time()
+print("Loading Random_pipeline...")
+
 import random
 
 from vector_rag.pipeline import VectorRAGPipeline
@@ -35,3 +40,9 @@ class RandomRAGPipeline:
         result["method"] = "random"
 
         return result
+    
+
+print(
+    f"Random_pipeline loaded in "
+    f"{time.time()-start:.2f}s"
+)

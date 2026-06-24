@@ -1,3 +1,8 @@
+import time
+
+start = time.time()
+print("Loading ReRanker...")
+
 from sentence_transformers import CrossEncoder
 import config
 
@@ -36,3 +41,9 @@ def rerank(query: str, chunks: list[dict], top_k: int = 5) -> list[dict]:
 
     reranked = sorted(chunks, key=lambda x: x["rerank_score"], reverse=True)
     return reranked[:top_k]
+
+
+print(
+    f"ReRanker loaded in "
+    f"{time.time()-start:.2f}s"
+)

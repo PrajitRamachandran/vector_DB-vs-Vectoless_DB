@@ -299,15 +299,20 @@ if question:
 
             if retrieval_method == "Auto":
 
+                selected_method = (
+                    rag_result.get("auto_selected_method")
+                    or "UNKNOWN"
+                )
+
                 st.info(
                     f"""
                         🤖 Auto RAG
 
                         Question Type:
-                        {rag_result.get('query_type')}
+                        {rag_result.get('query_type', 'unknown')}
 
                         Selected Method:
-                        {rag_result.get('auto_selected_method').upper()}
+                        {selected_method.upper()}
                     """
                 )
 
