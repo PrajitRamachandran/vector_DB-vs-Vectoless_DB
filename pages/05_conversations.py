@@ -8,7 +8,7 @@ import streamlit as st
 from streamlit_app.database.repository import (
     get_conversations,
     get_chunks_for_chat,
-    get_conversations_by_user,
+    get_recent_conversations_by_user,
     get_logs,
     delete_chat
 )
@@ -48,7 +48,7 @@ if is_admin():
 else:
 
     conversations = (
-        get_conversations_by_user(
+        get_recent_conversations_by_user(
             st.session_state.user_id
         )
     )
