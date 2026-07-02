@@ -1,4 +1,10 @@
 # pages/dashboard.py
+
+from streamlit_app.auth.protect_page import (
+    require_login
+)
+
+require_login()
 import plotly.graph_objects as go
 from pathlib import Path
 import json
@@ -8,7 +14,13 @@ from datetime import datetime
 from streamlit_app.database.repository import (
     get_conversations,
     get_evaluations,
-    get_dashboard_stats
+    get_dashboard_stats,
+    get_dashboard_stats_by_user,
+    get_recent_conversations_by_user
+)
+
+from streamlit_app.auth.session_manager import (
+    is_admin
 )
 
 # Page Config
@@ -117,7 +129,15 @@ st.caption(
 )
 # Top Metrics
 
-stats = get_dashboard_stats()
+if is_admin():
+
+    stats = get_dashboard_stats()
+
+else:
+
+    stats = get_dashboard_stats_by_user(
+        st.session_state.user_id
+    )
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -399,7 +419,15 @@ else:
         "Recent Conversations"
     )
 
-    recent = get_conversations()
+    if is_admin():
+
+        recent = get_conversations()
+
+    else:
+
+        recent = get_recent_conversations_by_user(
+            st.session_state.user_id
+        )
 
     if len(recent) > 0:
 

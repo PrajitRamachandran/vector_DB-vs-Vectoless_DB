@@ -19,6 +19,14 @@ from streamlit_app.services.rag_service import (
 import uuid
 import config
 
+
+
+from streamlit_app.auth.protect_page import (
+    require_login
+)
+
+require_login()
+
 from streamlit_app.database.repository import (
     save_conversation,
     save_retrieved_chunks,
@@ -342,6 +350,9 @@ if question:
 
             chat_id = save_conversation(
 
+                user_id=
+                    st.session_state.user_id,
+
                 session_id=
                     st.session_state.session_id,
 
@@ -507,6 +518,9 @@ if question:
 
                 session_id=
                     st.session_state.session_id,
+
+                user_id=
+                st.session_state.user_id,
 
                 method=
                     retrieval_method,

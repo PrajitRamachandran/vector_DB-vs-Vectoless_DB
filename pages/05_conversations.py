@@ -8,9 +8,16 @@ import streamlit as st
 from streamlit_app.database.repository import (
     get_conversations,
     get_chunks_for_chat,
+    get_conversations_by_user,
     get_logs,
     delete_chat
 )
+
+from streamlit_app.auth.protect_page import (
+    require_login
+)
+
+require_login()
 
 # ============================================================
 # PAGE CONFIG
@@ -28,7 +35,23 @@ st.title("📚 Conversations")
 # LOAD DATA
 # ============================================================
 
-conversations = get_conversations()
+from streamlit_app.auth.session_manager import (
+    is_admin
+)
+
+if is_admin():
+
+    conversations = (
+        get_conversations()
+    )
+
+else:
+
+    conversations = (
+        get_conversations_by_user(
+            st.session_state.user_id
+        )
+    )
 
 if not conversations:
 

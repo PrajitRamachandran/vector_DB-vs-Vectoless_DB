@@ -22,6 +22,12 @@ from streamlit_app.services.indexing_service import (
     get_index_status
 )
 
+
+from streamlit_app.auth.protect_page import (
+    require_login
+)
+
+require_login()
 # ============================================================
 # PAGE CONFIG
 # ============================================================

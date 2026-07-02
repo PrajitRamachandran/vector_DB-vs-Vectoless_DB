@@ -23,6 +23,12 @@ from streamlit_app.services.rag_service import (
     get_hybrid_pipeline
 )
 
+from streamlit_app.auth.protect_page import (
+    require_login
+)
+
+require_login()
+
 # ============================================================
 # PAGE CONFIG
 # ============================================================

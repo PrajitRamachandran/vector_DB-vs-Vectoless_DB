@@ -17,6 +17,7 @@ from streamlit_app.database.db import (
 
 def save_conversation(
     session_id: str,
+    user_id,
     method: str,
     model_name: str,
     prompt: str,
@@ -47,6 +48,7 @@ def save_conversation(
         INSERT INTO conversations (
             chat_id,
             session_id,
+            user_id,
             timestamp,
 
             method,
@@ -70,7 +72,7 @@ def save_conversation(
             error_message
         )
         VALUES (
-            ?, ?, ?,
+            ?, ?,?, ?,
             ?, ?,
             ?, ?,
             ?,
@@ -82,6 +84,7 @@ def save_conversation(
         (
             chat_id,
             session_id,
+            user_id,
             datetime.now().isoformat(),
 
             method,
@@ -601,3 +604,101 @@ def get_dashboard_stats():
     conn.close()
 
     return stats
+
+def get_dashboard_stats_by_user(
+    user_id
+):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    stats = {}
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM conversations
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+
+    stats["total_chats"] = (
+        cursor.fetchone()[0]
+    )
+
+    cursor.execute(
+        """
+        SELECT COUNT(
+            DISTINCT method
+        )
+        FROM conversations
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+
+    stats["methods_used"] = (
+        cursor.fetchone()[0]
+    )
+
+    cursor.execute(
+        """
+        SELECT AVG(total_latency)
+        FROM conversations
+        WHERE user_id = ?
+        """,
+        (user_id,)
+    )
+
+    stats["avg_latency"] = (
+        cursor.fetchone()[0]
+    )
+
+    cursor.execute(
+        """
+        SELECT COUNT(*)
+        FROM evaluations
+        """
+    )
+
+    stats["evaluation_runs"] = (
+        cursor.fetchone()[0]
+    )
+
+    conn.close()
+
+    return stats
+
+def get_recent_conversations_by_user(
+    user_id,
+    limit=10
+):
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM conversations
+        WHERE user_id = ?
+        ORDER BY timestamp DESC
+        LIMIT ?
+        """,
+        (
+            user_id,
+            limit
+        )
+    )
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return [
+        dict(row)
+        for row in rows
+    ]

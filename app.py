@@ -2,7 +2,9 @@
 
 from pathlib import Path
 import streamlit as st
-
+from streamlit_app.auth.session_manager import (
+    logout_user
+)
 # Pages Configuration
 
 st.set_page_config(
@@ -55,6 +57,36 @@ def initialise_session():
       st.session_state[key] = value
 
 initialise_session()
+if st.session_state.get(
+    "logged_in",
+    False
+):
+
+    with st.sidebar:
+
+        st.divider()
+
+        st.markdown(
+            f"""
+            ### 👤 User
+
+            **Username:** {st.session_state.username}
+
+            **Role:** {st.session_state.role}
+            """
+        )
+
+        if st.button(
+            "🚪 Logout",
+            use_container_width=True,
+            key="logout_button"
+        ):
+
+            logout_user()
+
+            st.switch_page(
+                "pages/00_login.py"
+            )
 
 # Styling
 
