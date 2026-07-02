@@ -53,3 +53,5 @@ langchain-openai
 ragas 
 tqdm 
 openai
+plotly
+torchvision

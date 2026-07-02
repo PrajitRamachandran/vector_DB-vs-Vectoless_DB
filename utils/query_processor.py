@@ -1,16 +1,33 @@
-#utils/query_processor.py
+import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
-import config
-import json
 
+import config
 from config import DATA_PROCESSED_DIR
 
 
+# ============================================================
+# Load companies once
+# ============================================================
+
+_COMPANIES_CACHE = None
+
+
 def get_known_companies():
+    """
+    Loads all companies from chunks.json.
+
+    Cached after first call so we don't repeatedly
+    read chunks.json for every query.
+    """
+
+    global _COMPANIES_CACHE
+
+    if _COMPANIES_CACHE is not None:
+        return _COMPANIES_CACHE
 
     chunks_path = (
         Path(DATA_PROCESSED_DIR)
@@ -29,88 +46,163 @@ def get_known_companies():
 
     for chunk in data["parents"]:
 
-        company = chunk.get(
-            "company"
-        )
+        company = chunk.get("company")
 
         if company:
             companies.add(
-                company.upper()
+                company.upper().strip()
             )
 
-    return sorted(companies)
+    _COMPANIES_CACHE = sorted(companies)
+
+    return _COMPANIES_CACHE
+
+
+# ============================================================
+# Company Detection
+# ============================================================
 
 def detect_company(question: str) -> str | None:
+    """
+    Detect company mentioned in user query.
+    Handles:
+    - Microsofts
+    - Microsoft's
+    - Amazons
+    - Amazon's
+    - NVIDIAs
+    - NVIDIA's
+    - Coca-Colas
+    - Coca-Cola's
+    """
 
-    q_lower = (question or "").lower()
+    if not question:
+        return None
+
+    q_lower = question.lower()
+
+    # Remove apostrophe possessives
+    q_lower = q_lower.replace("'s", "")
+    q_lower = q_lower.replace("’s", "")
 
     print("\n===== COMPANY MATCH DEBUG =====")
     print("QUESTION:", q_lower)
 
-    for company in get_known_companies():
+    companies = get_known_companies()
 
-        company_variants = [
+    for company in companies:
 
-            company.lower(),
+        company_lower = company.lower()
 
-            company.lower().replace(
-                "-",
-                " "
-            ),
+        variants = {
+            company_lower,
+            company_lower + "s",          # microsofts
+            company_lower.replace("-", " "),
+            company_lower.replace("-", "") ,
+            company_lower.replace(" ", ""),
+        }
 
-            company.lower().replace(
-                " ",
-                ""
-            )
-        ]
-
-        for keyword in company_variants:
+        for variant in variants:
 
             pattern = (
                 rf"(?<!\w)"
-                f"{re.escape(keyword)}"
+                f"{re.escape(variant)}"
                 rf"(?!\w)"
             )
 
             if re.search(
                 pattern,
-                q_lower
+                q_lower,
+                flags=re.IGNORECASE
             ):
+                print(f"MATCHED COMPANY: {company}")
+                print("==============================")
+
                 return company
 
     print("NO COMPANY MATCH")
-    print("==============================\n")
+    print("==============================")
+
+    return None
+
+# ============================================================
+# Year Detection
+# ============================================================
+
+def detect_year(question: str) -> str |None:
+    """
+    Extracts first year from query.
+
+    Example:
+    2024
+    2025
+    2026
+    """
+
+    if not question:
+        return None
+
+    match = re.search(
+        r"\b(20\d{2})\b",
+        question
+    )
+
+    if match:
+        return match.group(1)
 
     return None
 
 
-def detect_year(question: str) -> str | None:
-    """
-    Extracts a 4-digit year from the question if present.
-    """
-    match = re.search(r"\b(20\d{2})\b", question or "")
-    return match.group(1) if match else None
-
+# ============================================================
+# Query Preprocessing
+# ============================================================
 
 def preprocess_query(question: str) -> dict:
     """
-    Returns structured metadata about the question.
+    Extract structured retrieval metadata.
+
+    Returns:
+    {
+        original,
+        clean_query,
+        company,
+        year
+    }
     """
-    question = question or ""
+
+    question = (question or "").strip()
+
     company = detect_company(question)
+
     year = detect_year(question)
 
     clean_query = question
 
+    # Remove company name from retrieval query
     if company:
-        company_pattern = rf"(?<!\w){re.escape(company)}(?!\w)"
-        clean_query = re.sub(company_pattern, "", clean_query, flags=re.IGNORECASE)
 
-    if year:
-        year_pattern = rf"(?<!\d){re.escape(year)}(?!\d)"
-        clean_query = re.sub(year_pattern, "", clean_query)
+        company_patterns = [
 
-    clean_query = re.sub(r"\s+", " ", clean_query).strip(" ,;:-_()[]{}")
+            company,
+
+            company.replace("-", " "),
+
+            company.replace(" ", ""),
+
+            company.replace("-", "")
+        ]
+
+        for variant in company_patterns:
+
+            clean_query = re.sub(
+                rf"(?<!\w){re.escape(variant)}(?!\w)",
+                "",
+                clean_query,
+                flags=re.IGNORECASE
+            )
+
+    print("RAW:", question)
+    print("PROCESSED:", clean_query)
 
     return {
         "original": question,

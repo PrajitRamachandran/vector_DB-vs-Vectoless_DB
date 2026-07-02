@@ -160,15 +160,40 @@
 # )
 
 
-from streamlit_app.database.repository import (
-    get_conversations
-)
+# from streamlit_app.database.repository import (
+#     get_conversations
+# )
 
-conversations = get_conversations()
+# conversations = get_conversations()
 
-print(
-    f"Count: {len(conversations)}"
-)
+# print(
+#     f"Count: {len(conversations)}"
+# )
 
-for c in conversations[:3]:
-    print(c)
+# for c in conversations[:3]:
+#     print(c)
+
+
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
+
+from data_loader import run_preprocessing_pipeline
+from vectorless_rag.indexer import build_bm25_index
+
+print("=" * 60)
+print("REBUILDING BM25")
+print("=" * 60)
+
+print("\nRunning preprocessing pipeline...")
+data = run_preprocessing_pipeline()
+
+print(f"Parents : {len(data['parents'])}")
+print(f"Children: {len(data['children'])}")
+
+print("\nBuilding BM25 index...")
+build_bm25_index(data)
+
+print("\n✅ BM25 rebuild complete")

@@ -1,0 +1,140 @@
+{
+  "metadata": {
+    "total_questions": 14,
+    "companies": [
+  "Microsoft",
+  "Amazon",
+  "ASUS",
+  "Coca-Cola",
+  "Netflix",
+  "Reliance",
+  "Nvidia"
+],
+"categories": [
+  "financial_metrics",
+  "segment_performance",
+  "operational_metrics",
+  "risk_factors",
+  "business_facts",
+  "capital_allocation",
+  "governance_and_corporate_structure",
+  "numerical_retrieval",
+  "table_based_questions",
+  "multi_chunk_retrieval"
+]
+  },
+"questions":[
+  {
+    "id": "1",
+    "company": "Microsoft",
+    "question": "What was Microsofts total revenue for the fiscal year ended June 30, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Microsofts total revenue for the fiscal year ended June 30, 2025 was $281,724 million."
+  },
+  {
+    "id": "2",
+    "company": "Microsoft",
+    "question": "What was Microsofts total operating income for the fiscal year ended June 30, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Microsofts operating income for the fiscal year ended June 30, 2025 was $128,528 million."
+  },
+  {
+    "id": "3",
+    "company": "Amazon",
+    "question": "What was Amazons total consolidated net sales for the fiscal year ended December 31, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Amazons total consolidated net sales for the fiscal year ended December 31, 2025, were $716,924 million."
+  },
+  {
+    "id": "4",
+    "company": "Amazon",
+    "question": "What was Amazon's consolidated operating income for the 2025 fiscal year?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Amazons consolidated operating income was $79,975 million in 2025."
+  },
+  {
+    "id": "5",
+    "company": "ASUS",
+    "question": "What was ASUS Groups consolidated revenue for 2024?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "ASUS Groups consolidated revenue for 2024 was NT$587.1 billion.[cite: 2]"
+  },
+  {
+    "id": "6",
+    "company": "ASUS",
+    "question": "What was the net profit attributable to the owners of the parent company in 2024?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "The net profit attributable to the owners of the parent company in 2024 was NT$31.4 billion.[cite: 2]"
+  },
+  {
+    "id": "7",
+    "company": "Coca-Cola",
+    "question": "What were Coca-Colas net operating revenues for the year ended December 31, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Coca-Colas net operating revenues for the year ended December 31, 2025, were $47,941 million.[cite: 3]"
+  },
+  {
+    "id": "8",
+    "company": "Coca-Cola",
+    "question": "What was Coca-Colas consolidated net income in 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Coca-Colas consolidated net income for 2025 was $13,137 million.[cite: 3]"
+  },
+  {
+    "id": "9",
+    "company": "Netflix",
+    "question": "What were Netflixs total revenues for the year ended December 31, 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Netflixs total revenues for the year ended December 31, 2025, were $45,183,036 thousand."
+  },
+  {
+    "id": "10",
+    "company": "Netflix",
+    "question": "What was Netflixs net income for 2025?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Netflixs net income for 2025 was $10,981,201 thousand."
+  },
+  {
+    "id": "11",
+    "company": "Reliance",
+    "question": "What was Reliance Industries Limiteds consolidated revenue for the fiscal year 2025-26?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "Reliance Industries Limiteds consolidated revenue for FY 2025-26 was \u20b911,75,919 crore."
+  },
+  {
+    "id": "12",
+    "company": "Reliance",
+    "question": "What was the EBITDA for Reliance Industries Limited in FY 2025-26?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "The EBITDA for FY 2025-26 was \u20b92,07,911 crore."
+  },
+  {
+    "id": "13",
+    "company": "Nvidia",
+    "question": "What was NVIDIAs total revenue for fiscal year 2026?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "NVIDIAs total revenue for fiscal year 2026 was $215,938 million."
+  },
+  {
+    "id": "14",
+    "company": "Nvidia",
+    "question": "What was NVIDIAs net income for fiscal year 2026?",
+    "category": "financial_metrics",
+    "difficulty": "easy",
+    "reference_answer": "NVIDIAs net income for fiscal year 2026 was $120,067 million."
+  }
+]
+}

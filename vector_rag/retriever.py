@@ -112,9 +112,17 @@ def retrieve(
 
     # Build the BGE-prefixed query string (fix #1)
     bge_q = _bge_query(raw_query)
+    print("\n===================")
+    print("ORIGINAL :", query_info["original"])
+    print("COMPANY  :", company)
+    print("YEAR     :", query_info["year"])
+    print("USED FOR SEARCH:")
+    print(raw_query)
+    print("===================\n")
 
     # ── First attempt: with company filter ────────────────────────────────────
     where_filter  = {"company": company} if company else None
+    print("SEARCH QUERY:", bge_q)
     results       = _run_query(collection, bge_q, where_filter)
     child_chunks  = _filter_company_chunks(_build_child_chunks(results), company)
 
@@ -122,6 +130,7 @@ def retrieve(
     # Trigger fallback when the filter returned too few results OR the chunks
     # that came back are mostly from the wrong company (stale index signal).
     if where_filter is not None and len(child_chunks) < max(3, top_k):
+        print("SEARCH QUERY:", bge_q)
         results        = _run_query(collection, bge_q, None)
         all_chunks     = _build_child_chunks(results)
         child_chunks   = _filter_company_chunks(all_chunks, company)
@@ -156,6 +165,35 @@ def retrieve(
         if not parent_id or parent_id in seen_parents:
             continue
         parent = parent_lookup.get(parent_id)
+        parent = parent_lookup.get(parent_id)
+
+        if parent:
+
+            print("\n========== DEBUG ==========")
+            print("PARENT ID:", parent_id)
+
+            print(
+                "CHILD COMPANY:",
+                meta.get("company")
+            )
+
+            print(
+                "LOOKUP COMPANY:",
+                parent.get("company")
+            )
+
+            print(
+                "LOOKUP PAGE:",
+                parent.get("page")
+            )
+
+            print(
+                "LOOKUP CHUNK:",
+                parent.get("chunk_id")
+            )
+
+            print("===========================")
+
         if parent:
             seen_parents.add(parent_id)
             final_chunks.append({

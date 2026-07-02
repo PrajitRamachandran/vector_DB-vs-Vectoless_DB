@@ -7,6 +7,50 @@ from chromadb.utils import embedding_functions
 sys.path.append(str(Path(__file__).parent.parent))
 import config
 
+def reset_collection():
+    client = chromadb.PersistentClient(
+        path=config.CHROMA_PERSIST_DIR
+    )
+
+    try:
+        client.delete_collection(
+            config.CHROMA_COLLECTION
+        )
+        print("✅ Existing collection deleted")
+    except Exception:
+        print("ℹ️ Collection does not exist")
+
+    return client
+
+def recreate_collection():
+    client = chromadb.PersistentClient(
+        path=config.CHROMA_PERSIST_DIR
+    )
+
+    try:
+        client.delete_collection(
+            config.CHROMA_COLLECTION
+        )
+        print("✅ Deleted existing collection")
+    except Exception as e:
+        print(f"No collection to delete: {e}")
+
+    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name=config.EMBEDDING_MODEL
+    )
+
+    collection = client.create_collection(
+        name=config.CHROMA_COLLECTION,
+        embedding_function=embedding_fn,
+        metadata={
+            "hnsw:space": "cosine",
+            "hnsw:M": config.HNSW_M,
+            "hnsw:construction_ef": config.HNSW_CONSTRUCTION_EF,
+            "hnsw:search_ef": config.HNSW_SEARCH_EF,
+        }
+    )
+
+    return collection
 
 def get_chroma_collection():
     """
@@ -67,15 +111,18 @@ def index_chunks(
             4
         )
 
-    collection      = get_chroma_collection()
+    collection = recreate_collection()
     if log_callback:
         log_callback("ChromaDB initialized")
 
-    indexed_sources = get_indexed_sources(collection)
-    children        = data["children"]
+    children = data["children"]
 
-    new_children = [c for c in children
-                    if c["source"] not in indexed_sources]
+    new_children = children
+
+    print(
+        f"\n📦 Full rebuild mode "
+        f"({len(new_children)} child chunks)"
+    )
 
     if not new_children:
         print(f"\n✅ ChromaDB already up to date — {collection.count()} vectors\n")
