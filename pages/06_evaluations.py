@@ -134,10 +134,32 @@ with col2:
                 "Running RAGAS..."
             ):
 
-                result = run_ragas_benchmark(
-                    st.session_state.judge_results,
-                    st.session_state.judge_contexts
-                )
+                try:
+
+                    result = run_ragas_benchmark(
+                        st.session_state.judge_results,
+                        st.session_state.judge_contexts
+                    )
+
+                    st.session_state.ragas_results = result
+
+                    st.success(
+                        "RAGAS evaluation completed successfully."
+                    )
+
+                except Exception as e:
+
+                    st.error(
+                        f"RAGAS Evaluation Failed:\n\n{str(e)}"
+                    )
+
+                    import traceback
+
+                    st.expander(
+                        "Show Error Details"
+                    ).code(
+                        traceback.format_exc()
+                    )
 
                 if result["success"]:
 

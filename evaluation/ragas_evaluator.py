@@ -58,21 +58,41 @@ logging.getLogger("langchain_core.callbacks").setLevel(logging.CRITICAL)
 
 # ── langchain / RAGAS imports ─────────────────────────────────────────────────
 try:
+
     from langchain_openai import ChatOpenAI
+
     from ragas import evaluate as ragas_evaluate
-    from ragas.dataset_schema import EvaluationDataset, SingleTurnSample
-    from ragas.embeddings import BaseRagasEmbeddings
-    from ragas.llms import LangchainLLMWrapper
+
+    from ragas.dataset_schema import (
+        EvaluationDataset,
+        SingleTurnSample
+    )
+
+    from ragas.embeddings import (
+        BaseRagasEmbeddings
+    )
+
+    from ragas.llms import (
+        LangchainLLMWrapper
+    )
+
     from ragas.metrics import (
         answer_relevancy,
         context_precision,
         context_recall,
         faithfulness,
     )
-    from ragas.run_config import RunConfig
+
+    from ragas.run_config import (
+        RunConfig
+    )
+
     _RAGAS_AVAILABLE = True
-except ImportError as _err:
+
+except Exception as _err:
+
     _RAGAS_AVAILABLE = False
+
     _RAGAS_IMPORT_ERROR = str(_err)
 
 # ── project imports ───────────────────────────────────────────────────────────

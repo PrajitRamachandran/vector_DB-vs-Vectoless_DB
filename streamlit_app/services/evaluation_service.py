@@ -8,11 +8,6 @@ from evaluation.evaluator import (
     run_evaluation
 )
 
-from evaluation.ragas_evaluator import (
-    run_ragas_evaluation,
-    merge_results
-)
-
 from streamlit_app.database.repository import (
     save_evaluation,
     save_log
@@ -27,6 +22,18 @@ def run_judge_benchmark(
     vectorless_pipeline,
     hybrid_pipeline
 ):
+    try:
+
+        from evaluation.ragas_evaluator import (
+            run_ragas_evaluation,
+            merge_results
+        )
+
+    except Exception as e:
+
+        raise RuntimeError(
+            f"Failed to load RAGAS: {e}"
+        )
 
     try:
 
