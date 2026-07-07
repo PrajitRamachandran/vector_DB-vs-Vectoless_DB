@@ -329,6 +329,10 @@ def retrieve(
                 "rrf_sources" : child.get("rrf_sources", []),
                 "child_text"  : text,
             })
+        
+        # Diagnostic debug print for RETRIEVAL
+        company_name = child["metadata"].get("company", "UNKNOWN")
+        print(f"RETRIEVAL: Retrieved chunk -> {company_name}")
 
     return {
         "chunks"           : final_chunks,

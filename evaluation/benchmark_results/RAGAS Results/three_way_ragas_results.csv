@@ -1,0 +1,67 @@
+id,method,question,company,category,answer_relevancy,faithfulness,context_precision,context_recall,contextual_relevancy
+1,vector,"What were Apple's total net sales for the three months ended December 27, 2025?",Apple,financial_metrics,0.9999671600357501,1.0,,1.0,
+1,vectorless,"What were Apple's total net sales for the three months ended December 27, 2025?",Apple,financial_metrics,0.9999671600357501,1.0,,,
+1,hybrid,"What were Apple's total net sales for the three months ended December 27, 2025?",Apple,financial_metrics,0.9999671600357501,1.0,,,
+2,vector,"What was Apple's net income for the three months ended December 27, 2025?",Apple,financial_metrics,0.999973195786466,1.0,,1.0,
+2,vectorless,"What was Apple's net income for the three months ended December 27, 2025?",Apple,financial_metrics,0.999973195786466,1.0,,1.0,
+2,hybrid,"What was Apple's net income for the three months ended December 27, 2025?",Apple,financial_metrics,0.7410605273163352,1.0,,,
+3,vector,How many robots were operating in Amazon fulfillment centers according to the 2025 Annual Report?,Amazon,operations,0.9543879096838527,1.0,,1.0,
+3,vectorless,How many robots were operating in Amazon fulfillment centers according to the 2025 Annual Report?,Amazon,operations,0.9999765037446923,1.0,,1.0,
+3,hybrid,How many robots were operating in Amazon fulfillment centers according to the 2025 Annual Report?,Amazon,operations,0.9543879096838527,1.0,0.9999999999,1.0,0.9999999999
+4,vector,How much has Amazon committed to expand its rural delivery network?,Amazon,strategy,0.9999813960528176,1.0,0.9999999999,1.0,0.9999999999
+4,vectorless,How much has Amazon committed to expand its rural delivery network?,Amazon,strategy,0.9999813960528176,1.0,0.9999999999,1.0,0.9999999999
+4,hybrid,How much has Amazon committed to expand its rural delivery network?,Amazon,strategy,0.9999813960528176,1.0,0.9999999999,1.0,0.9999999999
+5,vector,Who was ASUS's spokesperson in the 2024 Annual Report?,ASUS,corporate_information,0.0,0.0,0.0,0.0,0.0
+5,vectorless,Who was ASUS's spokesperson in the 2024 Annual Report?,ASUS,corporate_information,0.722388627571051,1.0,0.9999999999,1.0,0.9999999999
+5,hybrid,Who was ASUS's spokesperson in the 2024 Annual Report?,ASUS,corporate_information,0.722388627571051,1.0,0.9999999999,1.0,0.9999999999
+6,vector,Which CPA firm audited ASUS according to the annual report?,ASUS,corporate_information,0.7846338788318112,1.0,,1.0,
+6,vectorless,Which CPA firm audited ASUS according to the annual report?,ASUS,corporate_information,0.9999759370906937,1.0,0.23677156176564249,1.0,0.23677156176564249
+6,hybrid,Which CPA firm audited ASUS according to the annual report?,ASUS,corporate_information,0.7846338788318112,1.0,0.23677156176564249,1.0,0.23677156176564249
+7,vector,"What were Apple's total assets as of December 27, 2025?",Apple,balance_sheet,1.0000000000000002,1.0,0.99999999995,1.0,0.99999999995
+7,vectorless,"What were Apple's total assets as of December 27, 2025?",Apple,balance_sheet,0.0,0.0,0.0,0.0,0.0
+7,hybrid,"What were Apple's total assets as of December 27, 2025?",Apple,balance_sheet,0.0,0.0,0.0,0.0,0.0
+8,vector,"What was Apple's cash and cash equivalents balance as of December 27, 2025?",Apple,balance_sheet,0.9999622341979748,1.0,0.5833333333041666,1.0,0.5833333333041666
+8,vectorless,"What was Apple's cash and cash equivalents balance as of December 27, 2025?",Apple,balance_sheet,0.9771118030447608,0.0,0.3333333333,0.0,0.3333333333
+8,hybrid,"What was Apple's cash and cash equivalents balance as of December 27, 2025?",Apple,balance_sheet,0.9771118030447608,0.0,0.3333333333,0.0,0.3333333333
+9,vector,What was Microsoft's fiscal year end date for the 2025 Form 10-K?,Microsoft,corporate_information,0.7289629612693321,1.0,0.99999999998,1.0,0.99999999998
+9,vectorless,What was Microsoft's fiscal year end date for the 2025 Form 10-K?,Microsoft,corporate_information,0.7289629612693321,1.0,0.6904761904589286,1.0,0.6904761904589286
+9,hybrid,What was Microsoft's fiscal year end date for the 2025 Form 10-K?,Microsoft,corporate_information,0.7289629612693321,1.0,0.6904761904589286,1.0,0.6904761904589286
+10,vector,"How many shares of Microsoft common stock were outstanding as of July 24, 2025?",Microsoft,equity,0.9999673407308388,0.0,0.9999999999,1.0,0.9999999999
+10,vectorless,"How many shares of Microsoft common stock were outstanding as of July 24, 2025?",Microsoft,equity,0.9999673407308388,1.0,0.9999999999,1.0,0.9999999999
+10,hybrid,"How many shares of Microsoft common stock were outstanding as of July 24, 2025?",Microsoft,equity,0.9999673407308388,1.0,0.9999999999,1.0,0.9999999999
+11,vector,"What was the aggregate market value of Netflix voting stock held by non-affiliates as of June 30, 2025?",Netflix,market_metrics,0.9999702841520272,0.0,0.9999999999,1.0,0.9999999999
+11,vectorless,"What was the aggregate market value of Netflix voting stock held by non-affiliates as of June 30, 2025?",Netflix,market_metrics,0.9999702841520272,0.0,0.9999999999,1.0,0.9999999999
+11,hybrid,"What was the aggregate market value of Netflix voting stock held by non-affiliates as of June 30, 2025?",Netflix,market_metrics,0.9999702841520272,0.0,0.9999999999,1.0,0.9999999999
+12,vector,"How many shares of Netflix common stock were outstanding as of December 31, 2025?",Netflix,equity,0.9999467601535157,,0.99999999995,1.0,0.99999999995
+12,vectorless,"How many shares of Netflix common stock were outstanding as of December 31, 2025?",Netflix,equity,0.9999467601535157,1.0,0.9999999999,1.0,0.9999999999
+12,hybrid,"How many shares of Netflix common stock were outstanding as of December 31, 2025?",Netflix,equity,0.9999467601535157,1.0,0.9999999999,1.0,0.9999999999
+13,vector,What was NVIDIA's fiscal year end date for the 2026 Form 10-K?,NVIDIA,corporate_information,0.7217842511581557,1.0,0.999999999975,1.0,0.999999999975
+13,vectorless,What was NVIDIA's fiscal year end date for the 2026 Form 10-K?,NVIDIA,corporate_information,0.7217842511581557,1.0,0.34166666665527773,1.0,0.34166666665527773
+13,hybrid,What was NVIDIA's fiscal year end date for the 2026 Form 10-K?,NVIDIA,corporate_information,0.7217842511581557,1.0,0.34166666665527773,1.0,0.34166666665527773
+14,vector,"How many shares of NVIDIA common stock were outstanding as of February 20, 2026?",NVIDIA,equity,0.8309633637068178,1.0,0.699999999965,1.0,0.699999999965
+14,vectorless,"How many shares of NVIDIA common stock were outstanding as of February 20, 2026?",NVIDIA,equity,0.9999711198821003,1.0,0.99999999995,1.0,0.99999999995
+14,hybrid,"How many shares of NVIDIA common stock were outstanding as of February 20, 2026?",NVIDIA,equity,1.0,1.0,0.99999999995,1.0,0.99999999995
+15,vector,How many digital subscribers did Jio serve according to the Integrated Annual Report 2025-26?,Reliance Industries,business_metrics,0.99997092584374,1.0,0.99999999998,1.0,0.99999999998
+15,vectorless,How many digital subscribers did Jio serve according to the Integrated Annual Report 2025-26?,Reliance Industries,business_metrics,0.99997092584374,1.0,0.9999999999,1.0,0.9999999999
+15,hybrid,How many digital subscribers did Jio serve according to the Integrated Annual Report 2025-26?,Reliance Industries,business_metrics,0.99997092584374,1.0,0.9087301587171768,1.0,0.9087301587171768
+16,vector,How many patents had Reliance filed across next-generation digital technologies?,Reliance Industries,innovation,0.0,1.0,0.0,0.0,0.0
+16,vectorless,How many patents had Reliance filed across next-generation digital technologies?,Reliance Industries,innovation,0.9967194666084046,1.0,0.7499999999625,1.0,0.7499999999625
+16,hybrid,How many patents had Reliance filed across next-generation digital technologies?,Reliance Industries,innovation,0.9967967091135974,1.0,0.7499999999625,1.0,0.7499999999625
+17,vector,What was NVIDIA's total revenue for Fiscal 2026 Q4 according to the revenue-by-market-platform table?,NVIDIA,financial_metrics,0.0,0.0,0.0,0.0,0.0
+17,vectorless,What was NVIDIA's total revenue for Fiscal 2026 Q4 according to the revenue-by-market-platform table?,NVIDIA,financial_metrics,0.0,0.0,0.0,0.0,0.0
+17,hybrid,What was NVIDIA's total revenue for Fiscal 2026 Q4 according to the revenue-by-market-platform table?,NVIDIA,financial_metrics,0.0,0.0,0.0,0.0,0.0
+18,vector,What was NVIDIA's Data Center revenue for Fiscal 2027 Q1?,NVIDIA,financial_metrics,0.9999589924925066,1.0,0.9999999999,1.0,0.9999999999
+18,vectorless,What was NVIDIA's Data Center revenue for Fiscal 2027 Q1?,NVIDIA,financial_metrics,0.9999589924925066,1.0,0.9999999999,1.0,0.9999999999
+18,hybrid,What was NVIDIA's Data Center revenue for Fiscal 2027 Q1?,NVIDIA,financial_metrics,0.9999589924925066,1.0,0.9999999999,1.0,0.9999999999
+19,vector,What is the title of Tesla's shareholder update document?,Tesla,document_metadata,0.0,1.0,0.0,0.0,0.0
+19,vectorless,What is the title of Tesla's shareholder update document?,Tesla,document_metadata,0.0,0.0,0.0,0.0,0.0
+19,hybrid,What is the title of Tesla's shareholder update document?,Tesla,document_metadata,0.0,0.0,0.0,0.0,0.0
+20,vector,On which page of the Tesla Q1 2026 Update does the Financial Summary section begin?,Tesla,document_structure,0.0,1.0,0.0,0.0,0.0
+20,vectorless,On which page of the Tesla Q1 2026 Update does the Financial Summary section begin?,Tesla,document_structure,0.0,0.0,0.0,0.0,0.0
+20,hybrid,On which page of the Tesla Q1 2026 Update does the Financial Summary section begin?,Tesla,document_structure,0.0,0.0,0.0,0.0,0.0
+21,vector,"What were Coca-Colas net operating revenues for the year ended December 31, 2025?",Coca-Cola,financial_metrics,0.9903160545476569,1.0,0.9999999999,1.0,0.9999999999
+21,vectorless,"What were Coca-Colas net operating revenues for the year ended December 31, 2025?",Coca-Cola,financial_metrics,0.7959368364834795,1.0,0.8611111110895834,1.0,0.8611111110895834
+21,hybrid,"What were Coca-Colas net operating revenues for the year ended December 31, 2025?",Coca-Cola,financial_metrics,0.8022967146935244,1.0,0.5833333333041667,1.0,0.5833333333041667
+22,vector,What was Coca-Colas consolidated net income in 2025?,Coca-Cola,financial_metrics,0.7737923695301401,1.0,0.49999999995,1.0,0.49999999995
+22,vectorless,What was Coca-Colas consolidated net income in 2025?,Coca-Cola,financial_metrics,0.9883304963861793,1.0,0.4444444444296296,1.0,0.4444444444296296
+22,hybrid,What was Coca-Colas consolidated net income in 2025?,Coca-Cola,financial_metrics,0.9883304963861793,1.0,0.474999999988125,1.0,0.474999999988125

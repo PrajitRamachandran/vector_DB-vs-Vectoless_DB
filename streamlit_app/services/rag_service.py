@@ -11,6 +11,7 @@ Uses Streamlit caching so pipelines
 are only loaded once.
 """
 
+import inspect
 import time
 
 start = time.time()
@@ -65,14 +66,20 @@ from streamlit_app.services.company_summary_service import (
     get_company_summary_context
 )
 
-from utils.query_processor import (
-    detect_company
+from streamlit_app.services.analytics_service import (
+    classify_query,
+    estimate_confidence,
+    estimate_hallucination_risk,
+    estimate_cost,
 )
 
 from llm import (
     load_llm,
     generate_answer
 )
+
+import config
+
 # ============================================================
 # PIPELINE CACHE
 # ============================================================
@@ -129,10 +136,10 @@ def get_pipeline(method: str):
 
     if method == "hybrid":
         return get_hybrid_pipeline()
-    
+
     if method == "random":
         return get_random_pipeline()
-    
+
     if method == "auto":
         return get_auto_pipeline()
 
@@ -140,14 +147,82 @@ def get_pipeline(method: str):
         f"Unknown method: {method}"
     )
 
+
+# ============================================================
+# ADMIN OVERRIDES
+# ============================================================
+# Retrieval parameter controls (Top-K, rerank threshold, etc.)
+# are only forwarded to `pipeline.ask` when that pipeline's
+# signature actually accepts the given keyword — this keeps the
+# UI's admin controls safe even if a given pipeline doesn't
+# support live tuning of that parameter.
+
+def _call_pipeline_ask(pipeline, question: str, overrides: dict):
+
+    ask_fn = pipeline.ask
+    accepted = set()
+
+    try:
+        accepted = set(inspect.signature(ask_fn).parameters.keys())
+    except (TypeError, ValueError):
+        pass
+
+    kwargs = {
+        k: v for k, v in (overrides or {}).items()
+        if k in accepted
+    }
+
+    return ask_fn(question, **kwargs)
+
+
+# ============================================================
+# ENRICHMENT
+# ============================================================
+
+def _enrich_result(question: str, result: dict, model_name: str) -> dict:
+    """
+    Adds query classification, confidence, hallucination risk,
+    and token/cost estimates to a raw pipeline result, without
+    overwriting values a pipeline already provides.
+    """
+
+    retrieved = result.get("retrieved", [])
+
+    if "query_type" not in result or not result.get("query_type"):
+        result["query_type"] = classify_query(question)
+
+    if "confidence" not in result or result.get("confidence") is None:
+        result["confidence"] = estimate_confidence(retrieved)
+
+    if "hallucination_risk" not in result or not result.get("hallucination_risk"):
+        result["hallucination_risk"] = estimate_hallucination_risk(
+            result.get("answer", ""), retrieved, result["confidence"]
+        )
+
+    usage = estimate_cost(
+        prompt_text=question,
+        completion_text=result.get("answer", ""),
+        model_name=model_name,
+    )
+    result.setdefault("tokens_prompt", usage["tokens_prompt"])
+    result.setdefault("tokens_completion", usage["tokens_completion"])
+    result.setdefault("estimated_cost_usd", usage["estimated_cost_usd"])
+
+    return result
+
+
 # ============================================================
 # ASK
 # ============================================================
 
 def ask_question(
     question: str,
-    method: str
+    method: str,
+    overrides: dict = None,
+    model_name: str = None
 ):
+
+    model_name = model_name or config.LLM_MODEL_ID
 
     try:
 
@@ -197,7 +272,7 @@ Total Documents:
 
                 "intent": intent,
 
-                "result": {
+                "result": _enrich_result(question, {
 
                     "answer": answer,
 
@@ -210,7 +285,8 @@ Total Documents:
                     "generation_time": 0,
 
                     "total_time": 0
-                }
+
+                }, model_name)
             }
 
         # ==========================================
@@ -229,7 +305,7 @@ Total Documents:
 
                 "intent": intent,
 
-                "result": {
+                "result": _enrich_result(question, {
 
                     "answer": answer,
 
@@ -242,7 +318,8 @@ Total Documents:
                     "generation_time": 0,
 
                     "total_time": 0
-                }
+
+                }, model_name)
             }
 
         # ==========================================
@@ -266,7 +343,7 @@ Total Documents:
 
                 "intent": intent,
 
-                "result": {
+                "result": _enrich_result(question, {
 
                     "answer": answer,
 
@@ -283,7 +360,8 @@ Total Documents:
                     "generation_time": 0,
 
                     "total_time": 0
-                }
+
+                }, model_name)
             }
 
         # ==========================================
@@ -320,13 +398,14 @@ Total Documents:
 
                     "intent": intent,
 
-                    "result": {
+                    "result": _enrich_result(question, {
 
                         "answer":
                             "Company could not be identified.",
 
                         "retrieved": []
-                    }
+
+                    }, model_name)
                 }
 
             context = (
@@ -345,13 +424,14 @@ Total Documents:
 
                     "intent": intent,
 
-                    "result": {
+                    "result": _enrich_result(question, {
 
                         "answer":
                             f"No data found for {company}.",
 
                         "retrieved": []
-                    }
+
+                    }, model_name)
                 }
 
             llm = load_llm()
@@ -393,23 +473,26 @@ Total Documents:
 
                 "intent": intent,
 
-                "result": {
+                "result": _enrich_result(question, {
 
                     "answer": answer,
 
                     "retrieved": []
-                }
+
+                }, model_name)
             }
 
         # ==========================================
         # NORMAL DOCUMENT QA
         # ==========================================
 
-        result = pipeline.ask(
-            question
+        result = _call_pipeline_ask(
+            pipeline, question, overrides
         )
 
         result["intent"] = intent
+
+        result = _enrich_result(question, result, model_name)
 
         return {
 
@@ -454,31 +537,31 @@ def pipeline_status():
     try:
         get_vector_pipeline()
         status["vector"] = True
-    except:
+    except Exception:
         pass
 
     try:
         get_vectorless_pipeline()
         status["vectorless"] = True
-    except:
+    except Exception:
         pass
 
     try:
         get_hybrid_pipeline()
         status["hybrid"] = True
-    except:
+    except Exception:
         pass
 
     try:
         get_random_pipeline()
         status["random"] = True
-    except:
+    except Exception:
         pass
 
     try:
         get_auto_pipeline()
         status["auto"] = True
-    except:
+    except Exception:
         pass
 
     return status

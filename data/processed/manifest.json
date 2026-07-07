@@ -1,49 +1,88 @@
 {
+  "10Q-Q1-2026-as-filed.pdf": {
+    "company": "Apple",
+    "hash": "841c3822cf01c65dfc50e46c467052c9",
+    "processed_at": "2026-07-06T17:03:10.409404",
+    "pages_count": 28,
+    "parents_count": 109,
+    "children_count": 389
+  },
+  "FY26_Q1_Consolidated_Financial_Statements.pdf": {
+    "company": "Apple",
+    "hash": "ac6c14e63e4de88cc186f86d22c40d02",
+    "processed_at": "2026-07-06T17:03:12.309030",
+    "pages_count": 3,
+    "parents_count": 9,
+    "children_count": 24
+  },
+  "Rev_by_Mkt_Qtrly_Trend_Q127-NEW-v3.pdf": {
+    "company": "Nvidia",
+    "hash": "da97a27b7cdadbf74c13a76b0a0ba4b9",
+    "processed_at": "2026-07-06T17:03:14.541276",
+    "pages_count": 1,
+    "parents_count": 3,
+    "children_count": 12
+  },
+  "TSLA-Q1-2026-Update.pdf": {
+    "company": "Tesla",
+    "hash": "4ffb18e762aa6a7222de2ec0a7ced080",
+    "processed_at": "2026-07-06T17:03:25.507512",
+    "pages_count": 31,
+    "parents_count": 87,
+    "children_count": 273
+  },
   "amazon_10k.pdf": {
+    "company": "Amazon",
     "hash": "9ce14026d33e33b86985da7b29a87086",
-    "processed_at": "2026-06-16T14:48:04.507501",
+    "processed_at": "2026-07-06T17:03:53.639218",
     "pages_count": 92,
     "parents_count": 508,
     "children_count": 1747
   },
   "asus_10k.pdf": {
+    "company": "Asus",
     "hash": "321baafd33d63d726fbb329032f5fcb3",
-    "processed_at": "2026-06-16T14:49:14.098764",
+    "processed_at": "2026-07-06T17:04:58.720267",
     "pages_count": 176,
     "parents_count": 656,
     "children_count": 2282
   },
   "cocacola_10k.pdf": {
+    "company": "Coca Cola",
     "hash": "1e907a85a547ff62066af3b270fa98c9",
-    "processed_at": "2026-06-16T14:50:24.040262",
+    "processed_at": "2026-07-06T17:06:03.102105",
     "pages_count": 192,
-    "parents_count": 1102,
-    "children_count": 3845
+    "parents_count": 1103,
+    "children_count": 3846
   },
   "microsoft_10k.pdf": {
+    "company": "Microsoft",
     "hash": "5bb6a471ac6f08757bcb3cf3f96efe64",
-    "processed_at": "2026-06-16T14:51:13.543324",
+    "processed_at": "2026-07-06T17:06:46.078580",
     "pages_count": 156,
     "parents_count": 742,
     "children_count": 2635
   },
   "netflix_10k.pdf": {
+    "company": "Netflix",
     "hash": "b829b52858cd2a2cffd1c1bcf04e2d58",
-    "processed_at": "2026-06-16T14:51:54.493138",
+    "processed_at": "2026-07-06T17:07:23.320858",
     "pages_count": 121,
-    "parents_count": 668,
-    "children_count": 2310
+    "parents_count": 672,
+    "children_count": 2316
   },
   "nvidia_10k.pdf": {
+    "company": "Nvidia",
     "hash": "d16543b9ca44f86baf6d9933dd97058d",
-    "processed_at": "2026-06-16T14:52:27.297902",
+    "processed_at": "2026-07-06T17:07:52.018763",
     "pages_count": 93,
-    "parents_count": 549,
-    "children_count": 1933
+    "parents_count": 550,
+    "children_count": 1936
   },
   "reliance_10k.pdf": {
+    "company": "Reliance Industries",
     "hash": "0ea919d0bb2b454076cc76690f18905f",
-    "processed_at": "2026-06-16T14:55:19.132527",
+    "processed_at": "2026-07-06T17:10:27.859458",
     "pages_count": 147,
     "parents_count": 1616,
     "children_count": 5917

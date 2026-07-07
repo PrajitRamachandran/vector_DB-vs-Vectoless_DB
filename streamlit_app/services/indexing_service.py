@@ -16,6 +16,81 @@ without modifying existing benchmark code.
 from pathlib import Path
 import shutil
 import traceback
+import re
+import fitz
+from mistralai.client.sdk import Mistral
+import config
+
+# ============================================================
+# COMPANY DETECTION
+# ============================================================
+
+def extract_first_pages_text(pdf_path, pages=3):
+
+    doc = fitz.open(pdf_path)
+
+    text = ""
+
+    for i in range(min(pages, len(doc))):
+        text += doc[i].get_text()
+
+    doc.close()
+
+    return text
+
+def sanitize_company_name(company):
+
+    company = company.lower()
+
+    company = re.sub(
+        r"[^a-z0-9]+",
+        "_",
+        company
+    )
+
+    company = company.strip("_")
+
+    return company
+
+def detect_company(text):
+
+    client = Mistral(
+        api_key=config.MISTRAL_API_KEY
+    )
+
+    prompt = f"""
+Identify the company name from this annual report.
+
+Rules:
+- Return only the company name.
+- No explanation.
+- No punctuation.
+- No extra words.
+
+Document:
+
+{text[:8000]}
+"""
+
+    response = client.chat.complete(
+        model=config.LLM_MODEL,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    company = (
+        response
+        .choices[0]
+        .message
+        .content
+        .strip()
+    )
+
+    return company
 
 # ============================================================
 # EXISTING PROJECT IMPORTS
@@ -68,31 +143,70 @@ BM25_MANIFEST = (
 # ============================================================
 
 def save_uploaded_pdf(uploaded_file):
-    """
-    Saves uploaded PDF into:
-
-    data/raw/
-
-    Returns:
-        Path
-    """
 
     RAW_DIR.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    destination = (
-        RAW_DIR /
-        uploaded_file.name
-    )
+    temp_path = RAW_DIR / uploaded_file.name
 
-    with open(destination, "wb") as f:
+    with open(temp_path, "wb") as f:
+
         f.write(
             uploaded_file.getbuffer()
         )
 
-    return destination
+    # -----------------------------------
+    # Detect company
+    # -----------------------------------
+
+    text = extract_first_pages_text(
+        temp_path
+    )
+
+    company = detect_company(
+        text
+    )
+
+    print(
+        f"Detected company: {company}"
+    )
+
+    return {
+        "path": str(temp_path),
+        "company": company
+    }
+
+    # ==========================================
+    # HANDLE DUPLICATES
+    # ==========================================
+
+    counter = 1
+
+    while final_path.exists():
+
+        final_path = (
+            RAW_DIR /
+            f"{company_slug}_{counter}_10k.pdf"
+        )
+
+        counter += 1
+
+    shutil.move(
+        temp_path,
+        final_path
+    )
+
+    print(
+        f"Detected Company: {company}"
+    )
+
+    print(
+        f"Saved As: {final_path.name}"
+    )
+
+    return final_path
 
 
 def list_raw_pdfs():

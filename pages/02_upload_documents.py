@@ -12,9 +12,9 @@ Responsibilities:
 Index creation is handled separately
 in Index Manager.
 """
-
+from pathlib import Path
 import streamlit as st
-
+from upload_processor import process_uploaded_pdf
 from streamlit_app.services.indexing_service import (
     save_uploaded_pdf,
     list_raw_pdfs,
@@ -78,18 +78,19 @@ if uploaded_files:
         ):
 
             for file in uploaded_files:
-
                 try:
-
-                    save_uploaded_pdf(file)
+                    pdf_path, company = process_uploaded_pdf(file)
+                    st.success(
+                        f"Detected company: {company}"
+                    )
+                    st.info(
+                        f"Saved as: {Path(pdf_path).name}"
+                    )
                     saved_count += 1
-
                 except Exception as e:
-
                     st.error(
                         f"{file.name}: {e}"
                     )
-
         st.success(
             f"{saved_count} file(s) saved successfully."
         )

@@ -3,7 +3,10 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
+from datetime import datetime
+
+ProgressCallback = Callable[[float, str], None]
 
 import pandas as pd
 from openai import OpenAI
@@ -16,7 +19,9 @@ from utils.rate_limiter import RateLimiter
 
 _HERE = Path(__file__).parent
 QUESTIONS_PATH = _HERE / "test_questions.json"
-RESULTS_DIR = _HERE / "results"
+
+RESULTS_DIR = _HERE / "benchmark_results" / "Judge Results"
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_judge():
@@ -239,6 +244,7 @@ def run_evaluation(
     hybrid_pipeline=None,          # ← optional; pass None to skip
     results_filename: str = "full_results.csv",
     capture_contexts: bool = False,
+    progress_callback: Optional[ProgressCallback] = None,
 ) -> tuple[pd.DataFrame, dict] | pd.DataFrame:
     """
     Runs all active pipelines on every question with rate limiting.
@@ -258,6 +264,9 @@ def run_evaluation(
         values are lists of plain-text context strings.  This dict is used by
         run_ragas_evaluation() to avoid re-running retrieval.
         Default is False to preserve the original return type (pd.DataFrame only).
+    progress_callback : Optional[Callable[[float, str], None]]
+        Invoked after every question with (fraction_complete in [0, 1], message).
+        Safe to leave as None for headless/CLI use.
 
     Returns
     -------
@@ -291,6 +300,15 @@ def run_evaluation(
     # context capture: {(qid, method): [str, ...]}
     retrieved_contexts_map: dict[tuple[str, str], list[str]] = {}
     total     = len(questions)
+
+    def _emit(fraction: float, message: str) -> None:
+        if progress_callback is not None:
+            try:
+                progress_callback(min(max(fraction, 0.0), 1.0), message)
+            except Exception:
+                pass  # progress reporting must never break the benchmark run
+
+    _emit(0.0, f"Starting judge benchmark — {total} questions × {n_methods} methods")
 
     print(f"\n{'=' * 55}")
     print(f"   PHASE 5 - EVALUATION ({total} questions × {n_methods} methods)")
@@ -375,11 +393,20 @@ def run_evaluation(
                 }
             )
 
+        _emit(i / total, f"Judged question {i}/{total} — {company} ({qid})")
+
+    _emit(1.0, "Judge benchmark complete")
+
     df = pd.DataFrame(records)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = RESULTS_DIR / results_filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    base_name = Path(results_filename).stem
+    extension = Path(results_filename).suffix or ".csv"
+    timestamped_filename = f"{base_name}_{timestamp}{extension}"
+    out_path = RESULTS_DIR / timestamped_filename
     df.to_csv(out_path, index=False, encoding="utf-8")
     print(f"\nResults saved → {out_path}")
+
 
     if capture_contexts:
         return df, retrieved_contexts_map

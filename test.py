@@ -90,11 +90,11 @@
 # Initialise Schema
 # =================================================================================================================
 
-# from streamlit_app.database.schema import (
-#     initialize_schema
-# )
+from streamlit_app.database.schema import (
+    initialize_schema
+)
 
-# initialize_schema()
+initialize_schema()
 
 
 # =================================================================================================================
@@ -174,26 +174,30 @@
 #     print(c)
 
 
-from pathlib import Path
-import sys
+# from pathlib import Path
+# import sys
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT))
+# ROOT = Path(__file__).resolve().parents[1]
+# sys.path.append(str(ROOT))
 
-from data_loader import run_preprocessing_pipeline
-from vectorless_rag.indexer import build_bm25_index
+# from data_loader import run_preprocessing_pipeline
+# from vectorless_rag.indexer import build_bm25_index
 
-print("=" * 60)
-print("REBUILDING BM25")
-print("=" * 60)
+# print("=" * 60)
+# print("REBUILDING BM25")
+# print("=" * 60)
 
-print("\nRunning preprocessing pipeline...")
-data = run_preprocessing_pipeline()
+# print("\nRunning preprocessing pipeline...")
+# data = run_preprocessing_pipeline()
 
-print(f"Parents : {len(data['parents'])}")
-print(f"Children: {len(data['children'])}")
+# print(f"Parents : {len(data['parents'])}")
+# print(f"Children: {len(data['children'])}")
 
-print("\nBuilding BM25 index...")
-build_bm25_index(data)
+# print("\nBuilding BM25 index...")
+# build_bm25_index(data)
 
-print("\n✅ BM25 rebuild complete")
+# print("\n✅ BM25 rebuild complete")
+
+from streamlit_app.database.repository import get_evaluations
+methods = {row["method"] for row in get_evaluations()}
+print(methods)

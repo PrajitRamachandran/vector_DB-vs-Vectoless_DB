@@ -17,7 +17,6 @@ CHUNKS_PATH = (
     "chunks.json"
 )
 
-
 def get_document_metadata():
 
     if not MANIFEST_PATH.exists():
@@ -38,15 +37,16 @@ def get_document_metadata():
 
     companies = []
 
-    for pdf in manifest.keys():
+    for pdf, metadata in manifest.items():
 
-        company = (
-            pdf
-            .replace("_10k.pdf", "")
-            .upper()
+        company = metadata.get(
+            "company",
+            "UNKNOWN"
         )
 
-        companies.append(company)
+        companies.append(
+            company.upper()
+        )
 
     return {
 
@@ -54,7 +54,7 @@ def get_document_metadata():
             list(manifest.keys()),
 
         "companies":
-            sorted(companies),
+            sorted(list(set(companies))),
 
         "total_documents":
             len(manifest),

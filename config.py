@@ -21,6 +21,24 @@ JUDGE_MODEL_ID = "mistral-medium-latest"
 # Rate limits
 MISTRAL_RPM = 18
 MISTRAL_JUDGE_RPM = 12
+
+# Selectable models exposed to admins in the chat UI
+# ("Model selection controls" / "admin retrieval parameter controls").
+AVAILABLE_LLM_MODELS = [
+    "mistral-medium-latest",
+    "mistral-small-latest",
+    "mistral-large-latest",
+]
+
+# Approximate USD price per 1K tokens, used only for the
+# in-app cost estimator shown in the chat UI. These are
+# indicative figures, not billing-accurate — verify against
+# your Mistral account/plan before treating them as exact.
+LLM_PRICING_PER_1K_TOKENS = {
+    "mistral-medium-latest": {"prompt": 0.0027, "completion": 0.0081},
+    "mistral-small-latest":  {"prompt": 0.0010, "completion": 0.0030},
+    "mistral-large-latest":  {"prompt": 0.0040, "completion": 0.0120},
+}
 #______________________________________________________________________________________________________________
 
 
@@ -57,12 +75,20 @@ PARENT_CHUNK_OVERLAP= 100
 TOP_K = 5   # final chunks returned (after reranking)
 FETCH_K = 15  # candidates fetched before reranking (3x TOP_K)
 
+# Bounds admins can tune live from the chat sidebar without
+# risking a degenerate/empty retrieval configuration.
+ADMIN_TOP_K_RANGE = (1, 20)
+ADMIN_FETCH_K_RANGE = (5, 50)
+ADMIN_RERANK_THRESHOLD_RANGE = (0.0, 1.0)
+DEFAULT_RERANK_THRESHOLD = 0.0
+
 # Paths
 _ROOT = Path(__file__).parent
 DATA_RAW_DIR = str(_ROOT / "data" / "raw")
 DATA_PROCESSED_DIR = str(_ROOT / "data" / "processed")
-RESULTS_DIR = str(_ROOT / "evaluation" / "results")
+RESULTS_DIR = str(_ROOT / "evaluation" / "benchmark_results")
 QUESTIONS_DIR = str(_ROOT / "evaluation" / "test_questions.json")
+EXPORTS_DIR = str(_ROOT / "data" / "exports")
 
 # Generation
 MAX_NEW_TOKENS = 512
@@ -85,5 +111,19 @@ KNOWN_COMPANIES = {
     "cocacola": "COCACOLA",
 }
 
+# Query classification labels surfaced in the chat UI
+QUERY_TYPE_LABELS = {
+    "numerical": "🔢 Numerical",
+    "comparative": "⚖️ Comparative",
+    "factual": "📌 Factual",
+    "semantic": "🧠 Semantic",
+    "unknown": "❓ Unclassified",
+}
 
-Sixty_nine = print("AAAYYYOOOOOO")
+# Starter questions shown on the chat welcome screen
+STARTER_QUESTIONS = [
+    "What were NVIDIA's total revenues in the last fiscal year?",
+    "Compare Microsoft and Amazon's R&D spending.",
+    "What are the key risk factors mentioned in Netflix's 10-K?",
+    "Summarize Reliance's business segments.",
+]
