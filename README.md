@@ -17,6 +17,7 @@ Try the deployed version first, then use the local setup below if you want to ru
 # Table of Contents
 
 - [Overview](#overview)
+- [Latest Updates](#latest-updates)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [System Architecture](#system-architecture)
@@ -40,6 +41,17 @@ Try the deployed version first, then use the local setup below if you want to ru
 
 # Overview
 
+## Latest Updates
+
+The current app includes several newer workflow improvements that are now part of the main experience:
+
+- 11 PDF reports in the corpus across 9 companies, including 10-Ks, 10-Qs, integrated annual reports, and shareholder updates.
+- 6,055 parent chunks and 21,377 child chunks already processed into the document store.
+- A richer chat workflow with compare mode, debug mode, admin-side retrieval tuning, query templates, session recovery, and keyboard shortcuts.
+- Confidence, hallucination-risk, token, and estimated-cost signals surfaced directly in the chat UI.
+- An expanded evaluation dashboard with judge runs, RAGAS runs, method comparison, historical trends, raw export, and experiment notes.
+- Upload handling that validates PDFs, sanitizes filenames, detects the company, and caches upload metadata separately from the ingestion manifest.
+
 ## Problem Statement
 
 Financial 10-K reports are long, dense, table-heavy documents. Finding an exact number, a business segment detail, or a risk factor often requires reading many pages and cross-referencing multiple sections. Naive retrieval systems can also return chunks from the wrong company or miss exact financial tokens such as revenue figures, percentages, and fiscal years.
@@ -59,6 +71,7 @@ The project combines:
 
 - A Streamlit multipage app for upload, indexing, chat, conversation review, and evaluation.
 - A preprocessing pipeline that extracts PDF text, cleans it, and builds parent-child chunks.
+- A query router that separates general chat, document questions, document metadata requests, company overview requests, and evaluation exploration.
 - Three primary retrieval strategies:
   - Vector RAG using ChromaDB + BGE embeddings + cross-encoder reranking.
   - Vectorless RAG using BM25 + a financial-aware tokenizer + reranking.
@@ -67,8 +80,9 @@ The project combines:
   - Random routing for method comparison.
   - Auto routing based on query classification rules.
 - Evaluation tooling that runs a judge benchmark and RAGAS metrics, then stores results in SQLite and CSV files.
+- A conversation layer that persists answers, retrieved chunks, feedback, analytics metadata, and exportable history.
 
-The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 parent chunks, 20,669 child chunks, a 700-question benchmark set, and a 14-question test subset.
+The bundled corpus currently covers 9 companies, with 11 source PDFs, 6,055 parent chunks, 21,377 child chunks, and persisted benchmark outputs under `evaluation/results/`.
 
 ## Business Value
 
@@ -93,7 +107,8 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 - Multipage Streamlit application with a landing page, authentication pages, dashboard, upload manager, index manager, chat interface, conversation browser, and evaluation dashboard.
 - Session-based authentication with login, registration, logout, and page protection.
 - Role-aware UI that distinguishes between regular users and admin users in the dashboard and conversations views.
-- Local persistence for conversations, retrieved chunks, evaluations, system logs, and authentication data.
+- Local persistence for conversations, retrieved chunks, evaluations, feedback, system logs, and authentication data.
+- Session recovery across refreshes using URL-backed session IDs.
 - Deployment-ready runtime configuration for Python 3.11.
 
 ## RAG Features
@@ -105,6 +120,7 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 - Parent-child chunk retrieval that returns rich parent context while indexing smaller child chunks for precision.
 - Company-aware retrieval using query preprocessing and metadata filters.
 - Year-aware query preprocessing and semantic query cleanup.
+- Query routing for document metadata lookups, company summaries, evaluation summaries, and general chat.
 - Fallback retrieval behavior when company filters are too narrow or the index returns weak matches.
 - Random retrieval mode for comparative experiments.
 - Auto routing mode that selects a retrieval strategy based on query type.
@@ -116,9 +132,11 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
   - Financial QA grounded strictly in retrieved context.
   - Structured company overview generation.
   - General chat responses.
+- A non-RAG chat path for greetings and other general-knowledge prompts.
 - Judge-based evaluation using a separate Mistral key and model path.
 - RAGAS evaluation support for answer relevancy, faithfulness, context precision, and context recall.
 - Deterministic generation settings for benchmark-style evaluation.
+- In-chat heuristics for query type, confidence, hallucination risk, and estimated token cost.
 
 ## Search Features
 
@@ -128,6 +146,7 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 - Metadata filters by company and year.
 - Reranking of candidate chunks before context assembly.
 - Guardrails that prevent empty-context prompts from being sent to the LLM.
+- Query templates that help users ask structured financial questions faster.
 
 ## Document Processing Features
 
@@ -137,6 +156,8 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 - Parent chunk creation at 1000 characters with 100-character overlap.
 - Child chunk creation at 300 characters with 50-character overlap.
 - Manifest-driven incremental processing that tracks document hashes and reprocesses only changed PDFs.
+- Safe upload handling that validates file type and size before saving to `data/raw/`.
+- Best-effort company detection from the first pages of each uploaded PDF.
 - Stable parent-child chunk identifiers for safe indexing and lookup.
 - Persisted processed artifacts in `data/processed/chunks.json` and `data/processed/manifest.json`.
 
@@ -144,11 +165,14 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 
 - Modern Streamlit chat UI with `st.chat_input` and `st.chat_message`.
 - Sidebar method selection for Hybrid, Vector, Vectorless, Random, and Auto.
-- One-click cache clearing for pipeline reloads.
-- Expanders for retrieved chunk inspection and raw pipeline output.
-- Dashboard charts for document distribution, benchmark comparisons, and system health.
+- Compare mode for side-by-side answer generation across two retrieval methods.
+- Admin-only live tuning for Top-K, Fetch-K, rerank threshold, chunk-size hint, and model selection.
+- One-click pipeline reload and one-click session clear actions.
+- Expanders for retrieved chunk inspection, citations, raw pipeline output, and session health.
+- Dashboard charts for document distribution, benchmark comparisons, system health, activity, and storage usage.
 - Conversations page with filtering, search, detail view, chunk drill-down, delete, and CSV export.
-- Evaluation dashboard with benchmark execution, leaderboard tables, metric charts, trend charts, and download support.
+- Evaluation dashboard with judge execution, RAGAS execution, compare runs, history, notes, and raw session export.
+- Keyboard shortcuts and session recovery so a conversation can survive reruns and page refreshes.
 
 ## Security Features
 
@@ -182,6 +206,7 @@ The bundled corpus currently covers 7 companies, with 7 source PDFs, 5,841 paren
 - Finetuning scaffolding for generating verified training pairs from retrieval outputs.
 - Utility scripts for chunk integrity checks, BM25 rebuilds, and admin account bootstrapping.
 - Generated benchmark charts and CSV results under `evaluation/results/`.
+- Raw benchmark session exports and experiment notes for auditability.
 
 # Screenshots
 
@@ -299,12 +324,13 @@ sequenceDiagram
 - Built with Streamlit multipage navigation.
 - Uses `st.chat_input`, `st.chat_message`, `st.metric`, `st.dataframe`, `st.bar_chart`, and Plotly charts.
 - Uses session state to preserve the current user, session ID, selected method, and chat history.
+- Includes compare mode, admin controls, query templates, and conversation export helpers in the chat page.
 
 ## Backend
 
 - Pure Python service layer without a separate FastAPI or Flask server.
 - SQLite repository layer for persistence.
-- Utility services for indexing, RAG orchestration, document metadata, company summaries, and evaluation.
+- Utility services for indexing, RAG orchestration, document metadata, company summaries, analytics, and evaluation.
 
 ## AI Layer
 
@@ -318,6 +344,7 @@ sequenceDiagram
 - Lexical retrieval uses BM25 with a financial tokenizer.
 - Hybrid retrieval combines both signals using Reciprocal Rank Fusion.
 - Cross-encoder reranking sorts candidate chunks by relevance before context assembly.
+- Random and auto-routing pipelines are available for experiment comparison and query-aware routing.
 
 ## Embedding Layer
 
@@ -474,8 +501,9 @@ sequenceDiagram
 7. The reranker scores candidates with a cross-encoder.
 8. Parent chunks are assembled into a context string.
 9. Mistral generates a grounded answer using the context.
-10. The conversation, retrieval traces, and chunk evidence are stored in SQLite.
-11. The UI renders the answer, timings, retrieved chunks, and raw pipeline output.
+10. Optional compare mode runs a second retrieval strategy side by side for the same question.
+11. The conversation, retrieval traces, and chunk evidence are stored in SQLite.
+12. The UI renders the answer, timings, confidence signals, retrieved chunks, and raw pipeline output.
 
 ## Indexing Workflow
 
@@ -495,7 +523,7 @@ sequenceDiagram
 3. The judge model scores answer quality.
 4. RAGAS computes retrieval and grounding metrics when requested.
 5. Results are written to CSV and persisted in SQLite.
-6. The dashboard renders leaderboards, metric tables, trend charts, and downloads.
+6. The dashboard renders leaderboards, metric tables, trend charts, run comparisons, notes, and downloads.
 
 # RAG Pipeline Deep Dive
 
@@ -705,9 +733,9 @@ There is no separate public REST or GraphQL API in this repository. The user-fac
 | `pages/01_dashboard.py` | UI page | Show dataset stats, evaluation summaries, and recent chats. | Streamlit dashboard view. |
 | `pages/02_upload_documents.py` | UI page | Upload and preprocess PDFs. | Status messages and rerun. |
 | `pages/03_index_manager.py` | UI page | Build or delete retrieval indexes. | Status messages and rerun. |
-| `pages/04_chat.py` | UI page | Ask questions using the selected retrieval method. | Answer, retrieved chunks, and stored conversation. |
-| `pages/05_conversations.py` | UI page | Browse, inspect, delete, and export conversations. | Streamlit analytics view. |
-| `pages/06_evaluations.py` | UI page | Run judge and RAGAS benchmarks. | Leaderboard, charts, and downloadable results. |
+| `pages/04_chat.py` | UI page | Ask questions using the selected retrieval method, compare two methods, or use admin controls. | Answer, retrieved chunks, diagnostics, and stored conversation. |
+| `pages/05_conversations.py` | UI page | Browse, inspect, delete, and export conversations. | Streamlit analytics view with filters and chunk drill-down. |
+| `pages/06_evaluations.py` | UI page | Run judge and RAGAS benchmarks, compare runs, and save raw outputs. | Leaderboard, charts, notes, and downloadable results. |
 
 ## Internal Python APIs
 
@@ -748,15 +776,17 @@ There is no separate public REST or GraphQL API in this repository. The user-fac
 
 ## Known Companies
 
-The retriever and router currently recognize these companies from the codebase and processed dataset:
+The current corpus and benchmark coverage includes:
 
 - Amazon
+- Apple
 - ASUS
-- Coca-Cola
+- Coca Cola
 - Microsoft
 - Netflix
 - NVIDIA
-- Reliance
+- Reliance Industries
+- Tesla
 
 ## Data and Artifact Paths
 
