@@ -149,7 +149,7 @@ def export_pdf(conversations: list) -> bytes:
         pdf.line(10, y, 200, y)
         pdf.ln(4)
 
-    return bytes(pdf.output(dest="S"))
+    return pdf.output(dest="S").encode("utf-8")
 
 
 def _ascii_safe(text: str) -> str:

@@ -326,8 +326,123 @@ except Exception:
     evaluations = []
     data_load_ok = False
 
-history_df = pd.DataFrame(evaluations) if evaluations else pd.DataFrame()
+_history_df_persisted = pd.DataFrame(evaluations) if evaluations else pd.DataFrame()
+
+
+def merge_live_results(persisted_df: pd.DataFrame):
+    """
+    Overlay the current in-session Judge/RAGAS results on top of persisted
+    history so every KPI, chart, and tab reflects the newest run instantly —
+    without waiting for a page reload or for the database write to land.
+    """
+    live_source = st.session_state.ragas_results if st.session_state.ragas_results is not None \
+        else st.session_state.judge_results
+
+    if live_source is None:
+        return persisted_df.copy(), False
+
+    raw = live_source if isinstance(live_source, pd.DataFrame) else pd.DataFrame(live_source)
+    if raw.empty or "method" not in raw.columns:
+        return persisted_df.copy(), False
+
+    run_ts = st.session_state.last_run_ts or datetime.now().isoformat()
+    is_ragas = st.session_state.ragas_results is not None
+    ragas_metric_cols = ["faithfulness", "answer_relevancy", "context_precision", "context_recall", "company_accuracy"]
+
+    live_rows = []
+    for method, g in raw.groupby("method"):
+        row = {"method": method, "timestamp": run_ts, "num_questions": len(g)}
+        if "judge_score" in g.columns:
+            row["avg_judge_score"] = g["judge_score"].mean()
+        for col in ragas_metric_cols:
+            if col in g.columns:
+                row[col] = g[col].mean()
+        if is_ragas:
+            present = [row[c] for c in ragas_metric_cols if c in row and pd.notna(row[c])]
+            if present and pd.notna(row.get("avg_judge_score")):
+                row["overall_score"] = float(np.mean([row["avg_judge_score"] / 5.0] + present))
+        live_rows.append(row)
+
+    live_df = pd.DataFrame(live_rows)
+    if live_df.empty:
+        return persisted_df.copy(), False
+
+    merged = persisted_df.copy()
+    if merged.empty:
+        merged = live_df
+    else:
+        # Avoid double-counting once the DB write for this exact run lands —
+        # drop any persisted row matching the same method + live run timestamp,
+        # then layer the live rows on top.
+        if "timestamp" in merged.columns:
+            dup_mask = merged["method"].isin(live_df["method"]) & (merged["timestamp"].astype(str) == str(run_ts))
+            merged = merged[~dup_mask]
+        merged = pd.concat([merged, live_df], ignore_index=True, sort=False)
+
+    return merged, True
+
+
+history_df, has_live_overlay = merge_live_results(_history_df_persisted)
 current_df = latest_per_method(history_df) if not history_df.empty else history_df
+
+
+def compute_run_kpis(hist_df: pd.DataFrame) -> dict:
+    """Benchmark-specific KPI figures: run counts, latest run timestamps, questions evaluated."""
+    kpis = {
+        "total_judge_runs": 0,
+        "total_ragas_runs": 0,
+        "latest_judge_run": None,
+        "latest_ragas_run": None,
+        "questions_evaluated": None,
+    }
+    if hist_df.empty:
+        d = pd.DataFrame()
+    else:
+        d = hist_df.copy()
+        d["timestamp"] = pd.to_datetime(d["timestamp"], errors="coerce")
+
+    if not d.empty and "avg_judge_score" in d.columns:
+        judge_rows = d[d["avg_judge_score"].notna()]
+        kpis["total_judge_runs"] = len(judge_rows)
+        if not judge_rows.empty:
+            latest_judge = judge_rows.sort_values("timestamp").iloc[-1]
+            kpis["latest_judge_run"] = latest_judge["timestamp"]
+            if "num_questions" in judge_rows.columns and pd.notna(latest_judge.get("num_questions")):
+                kpis["questions_evaluated"] = int(latest_judge["num_questions"])
+
+    ragas_signal_col = None
+    if not d.empty:
+        ragas_signal_col = "overall_score" if "overall_score" in d.columns else (
+            "faithfulness" if "faithfulness" in d.columns else None
+        )
+
+    if ragas_signal_col:
+        ragas_rows = d[d[ragas_signal_col].notna()]
+        kpis["total_ragas_runs"] = len(ragas_rows)
+        if not ragas_rows.empty:
+            latest_ragas = ragas_rows.sort_values("timestamp").iloc[-1]
+            kpis["latest_ragas_run"] = latest_ragas["timestamp"]
+            if kpis["questions_evaluated"] is None and "num_questions" in ragas_rows.columns \
+                    and pd.notna(latest_ragas.get("num_questions")):
+                kpis["questions_evaluated"] = int(latest_ragas["num_questions"])
+
+    if kpis["questions_evaluated"] is None:
+        live_raw = st.session_state.ragas_results if st.session_state.ragas_results is not None \
+            else st.session_state.judge_results
+        if live_raw is not None:
+            live_df = live_raw if isinstance(live_raw, pd.DataFrame) else pd.DataFrame(live_raw)
+            if not live_df.empty:
+                kpis["questions_evaluated"] = (
+                    int(live_df["question"].nunique()) if "question" in live_df.columns else len(live_df)
+                )
+
+    return kpis
+
+
+def fmt_ts(ts) -> str:
+    if ts is None or pd.isna(ts):
+        return "—"
+    return pd.Timestamp(ts).strftime("%b %d, %Y · %H:%M")
 
 # ============================================================
 # STATUS INDICATORS
@@ -351,55 +466,44 @@ st.markdown(
 # KPI SUMMARY CARDS
 # ============================================================
 
-best_row = None
-if not current_df.empty and "overall_score" in current_df.columns:
-    best_row = safe_best_row(current_df, "overall_score")
-
-if best_row is None:
+if history_df.empty:
     st.info(
         "No benchmark results yet — run **Judge Benchmark** then **RAGAS Evaluation** "
         "to populate scores (overall_score requires RAGAS metrics)."
     )
 else:
-    best_method = METHOD_LABELS.get(best_row["method"], best_row["method"])
-    best_score = fmt_score(best_row["overall_score"])
-    total_evals = len(history_df)
-    latest_ts = pd.to_datetime(history_df["timestamp"], errors="coerce").max()
-    latest_run_str = latest_ts.strftime("%b %d, %Y · %H:%M") if pd.notna(latest_ts) else "—"
+    kpis = compute_run_kpis(history_df)
 
-    deltas = compute_deltas(history_df)
-    d = deltas.get(best_row["method"])
-    if d is None:
-        delta_html = '<span class="delta-flat">first run</span>'
-    elif abs(d) < 0.005:
-        delta_html = '<span class="delta-flat">no change</span>'
-    else:
-        cls = "delta-pos" if d > 0 else "delta-neg"
-        arrow = "▲" if d > 0 else "▼"
-        delta_html = f'<span class="{cls}">{arrow} {fmt_score(abs(d))} vs last run</span>'
+    questions_val = kpis["questions_evaluated"] if kpis["questions_evaluated"] is not None else "—"
+    live_tag = ' <span class="delta-pos">● live</span>' if has_live_overlay else ""
 
     st.markdown(
         f"""
         <div class="kpi-row">
           <div class="kpi-card">
-            <div class="kpi-label">🥇 Best Method</div>
-            <div class="kpi-value">{best_method}</div>
-            <div class="kpi-sub">{delta_html}</div>
+            <div class="kpi-label">🧑‍⚖️ Total Judge Runs</div>
+            <div class="kpi-value">{kpis['total_judge_runs']}</div>
+            <div class="kpi-sub">runs with judge scores{live_tag}</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Best Score</div>
-            <div class="kpi-value">{best_score}</div>
-            <div class="kpi-sub">overall benchmark score</div>
+            <div class="kpi-label">📐 Total RAGAS Runs</div>
+            <div class="kpi-value">{kpis['total_ragas_runs']}</div>
+            <div class="kpi-sub">runs with RAGAS metrics</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Total Evaluations</div>
-            <div class="kpi-value">{total_evals}</div>
-            <div class="kpi-sub">runs stored in history</div>
+            <div class="kpi-label">Latest Judge Run</div>
+            <div class="kpi-value" style="font-size:1.15rem;">{fmt_ts(kpis['latest_judge_run'])}</div>
+            <div class="kpi-sub">most recent judge benchmark</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Latest Run</div>
-            <div class="kpi-value" style="font-size:1.15rem;">{latest_run_str}</div>
-            <div class="kpi-sub">most recent benchmark</div>
+            <div class="kpi-label">Latest RAGAS Run</div>
+            <div class="kpi-value" style="font-size:1.15rem;">{fmt_ts(kpis['latest_ragas_run'])}</div>
+            <div class="kpi-sub">most recent RAGAS evaluation</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">❓ Questions Evaluated</div>
+            <div class="kpi-value">{questions_val}</div>
+            <div class="kpi-sub">in the latest run</div>
           </div>
         </div>
         """,
@@ -440,9 +544,13 @@ with col1:
         if result.get("success"):
             st.session_state.judge_results = result["results"]
             st.session_state.judge_contexts = result["contexts"]
+            # A fresh judge run invalidates any RAGAS scores computed against the
+            # previous answers — clear them so stale metrics never linger on screen.
+            st.session_state.ragas_results = None
             st.session_state.last_run_ts = datetime.now().isoformat()
             progress_bar.progress(1.0, text="Judge benchmark completed")
             st.success("Judge benchmark completed.")
+            st.cache_data.clear()
         else:
             progress_bar.progress(1.0, text="Judge benchmark failed")
             st.error(result.get("error", "Unknown error"))
@@ -472,6 +580,7 @@ with col2:
                     st.session_state.ragas_results = result["combined"]
                     progress_bar.progress(1.0, text="RAGAS evaluation completed")
                     st.success("RAGAS evaluation completed.")
+                    st.cache_data.clear()
                 else:
                     progress_bar.progress(1.0, text="RAGAS evaluation failed")
                     st.error(result.get("error", "Unknown error"))
@@ -492,6 +601,8 @@ with col3:
         st.session_state.judge_results = None
         st.session_state.judge_contexts = None
         st.session_state.ragas_results = None
+        st.session_state.last_run_ts = None
+        st.cache_data.clear()
         st.success("Evaluation history cleared.")
         st.rerun()
 
