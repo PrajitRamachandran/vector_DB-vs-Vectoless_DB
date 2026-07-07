@@ -61,3 +61,5 @@ langchain-community==0.0.38
 langchain-openai==0.0.8
 bcrypt
 extra-streamlit-components
+
+mistralai
